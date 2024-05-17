@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+.kadwa-regular {
+  font-family: "Kadwa", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.kadwa-bold {
+  font-family: "Kadwa", serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.light-grey {
+  color: rgb(170, 170, 170);
+}
+
+.dark-grey {
+  color: rgb(24, 24, 24);
+}
+
