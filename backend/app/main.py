@@ -1,5 +1,6 @@
 from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import text
 from sqlalchemy import select
 from fastapi import FastAPI
 from database import get_db
@@ -15,20 +16,20 @@ def read_root():
 @app.get("/puzzle/{id}")
 def fetch_puzzle(id: int,  db:Session = Depends(get_db)):
 
-    puzzle_resultset = db.execute("""
+    puzzle_resultset = db.execute(text("""
     SELECT * 
     FROM   puzzle 
         LEFT JOIN users 
                 ON puzzle.created_by = users.id 
     WHERE  puzzle.id = :id 
-    """, {'id': id}).fetchone()
+    """), {'id': id}).fetchone()
 
-    hint_result_set = db.execute("""
+    hint_result_set = db.execute(text("""
     SELECT Concat(clue, direction) AS clue, 
         hint 
     FROM   hints 
     WHERE  id = :id 
-    """, {'id': id}).fetchall()
+    """), {'id': id}).fetchall()
 
     result = dict(puzzle_resultset)
     hints = dict(hint_result_set)
@@ -54,11 +55,11 @@ def fetch_puzzle(id: int,  db:Session = Depends(get_db)):
 
 @app.post("/puzzle/{id}/{solution}")
 def validate_puzzle(id: int, solution: str, db:Session = Depends(get_db)):
-    resultset = db.execute("""
+    resultset = db.execute(text("""
     SELECT solution 
     FROM   puzzle 
     WHERE  puzzle.id = :id 
-    """, {'id': id}).fetchone()
+    """), {'id': id}).fetchone()
 
     actual_solution = dict(resultset)["solution"]
 
