@@ -1,6 +1,6 @@
 CREATE TABLE TIMINGS (
     ID int,
-    USER int,
+    NAME int,
     USED_ASSISTANCE int,
     CREATED_ON date
-)
+);
