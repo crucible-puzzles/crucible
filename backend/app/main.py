@@ -15,7 +15,7 @@ def read_root():
 @app.get("/puzzle/{id}")
 def fetch_puzzle(id: int,  db:Session = Depends(get_db)):
 
-    resultset = db.execute("""
+    puzzle_resultset = db.execute("""
     SELECT * 
     FROM   puzzle 
         LEFT JOIN users 
@@ -23,7 +23,15 @@ def fetch_puzzle(id: int,  db:Session = Depends(get_db)):
     WHERE  puzzle.id = :id 
     """, {'id': id}).fetchone()
 
-    result = dict(resultset)
+    hint_result_set = db.execute("""
+    SELECT Concat(clue, direction) AS clue, 
+        hint 
+    FROM   hints 
+    WHERE  id = :id 
+    """, {'id': id}).fetchall()
+
+    result = dict(puzzle_resultset)
+    hints = dict(hint_result_set)
 
     structure = []
 
@@ -32,13 +40,39 @@ def fetch_puzzle(id: int,  db:Session = Depends(get_db)):
             structure.append(idx)
         
 
-    resp = {"Title": result["title"],
-            "Created On": result["created_on"],
-            "Created By": result["name"],
-            "board_height": result["x"],
-            "board_width": result["y"],
+    resp = {"title": result["title"],
+            "createdOn": result["created_on"],
+            "createdBy": result["name"],
+            "boardWidth": result["board_width"],
+            "boardHeight": result["board_height"],
             "structure" : structure,
+            "hints" : hints
             }
 
 
     return resp
+
+@app.post("/puzzle/{id}/{solution}")
+def validate_puzzle(id: int, solution: str, db:Session = Depends(get_db)):
+    resultset = db.execute("""
+    SELECT solution 
+    FROM   puzzle 
+    WHERE  puzzle.id = :id 
+    """, {'id': id}).fetchone()
+
+    actual_solution = dict(resultset)["solution"]
+
+    if len(solution) != len(actual_solution):
+        return "Invalid Solution (length does not match expected)"
+    
+    if actual_solution == solution:
+        return True
+    
+    indices = []
+    for idx, char in enumerate(solution):
+        if actual_solution[idx] != char:
+            indices.append(idx)
+
+    return {"invalidIndices": indices}
+
+
