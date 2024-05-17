@@ -1,6 +1,6 @@
 CREATE TABLE USERS (
 ID int,
 NAME int,
-EMAIL varchar2(100)
+EMAIL varchar(100)
 CREATED_ON date
 )
