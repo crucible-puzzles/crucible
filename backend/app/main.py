@@ -14,7 +14,7 @@ def read_root():
 
 
 @app.get("/puzzle/{id}")
-def fetch_puzzle(id: int,  db:Session = Depends(get_db)):
+def fetch_puzzle(id: int,  db: Session = Depends(get_db)):
 
     puzzle_resultset = db.execute(text("""
     SELECT * 
@@ -39,19 +39,18 @@ def fetch_puzzle(id: int,  db:Session = Depends(get_db)):
     for char, idx in enumerate(result["solution"]):
         if char == '.':
             structure.append(idx)
-        
 
     resp = {"title": result["title"],
             "createdOn": result["created_on"],
             "createdBy": result["name"],
             "boardWidth": result["board_width"],
             "boardHeight": result["board_height"],
-            "structure" : structure,
-            "hints" : hints
+            "structure": structure,
+            "hints": hints
             }
 
-
     return resp
+
 
 @app.post("/puzzle/{id}/{solution}")
 def validate_puzzle(id: int, solution: str, db:Session = Depends(get_db)):
