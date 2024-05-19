@@ -1,7 +1,7 @@
 import next from 'next';
 import React, { useState, useEffect, useRef } from 'react';
 import Hints from './hints';
-import Square from './Square';
+import Square from './square';
 
 
 interface BoardProps {
@@ -198,8 +198,7 @@ function Board({ boardWidth, boardHeight, editorMode, initialStructure, initialH
     setFocusIndex(prevIndex);
   };
 
-  const handleKeyPress = (event: React.KeyboardEvent, index: number) => {
-    const key = event.key;
+  const handleKeyPress = (key: String, index: number) => {
     if (key.length === 1 && key.match(/[a-zA-Z\.]/)) {
       moveFocus();
     }
@@ -259,7 +258,7 @@ function Board({ boardWidth, boardHeight, editorMode, initialStructure, initialH
       <Square
         key={i}
         ref={squareRefs.current[i]}
-        onKeyPress={(event: React.KeyboardEvent<HTMLDivElement>) => handleKeyPress(event, i)}
+        onKeyPress={(key: String) => handleKeyPress(key, i)}
         onClick={() => handleClick(i)}
         onBlur={() => handleSquareBlur(i)}
         onBackspace={() => moveFocusBackward()}

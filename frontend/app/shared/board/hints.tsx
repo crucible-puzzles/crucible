@@ -22,8 +22,8 @@ const Hints: React.FC<HintsProps> = ({ hints, currentHint, onHintChange }) => {
     }
   };
 
-  const acrossHints = hints.filter((hint) => hint.direction === 'across');
-  const downHints = hints.filter((hint) => hint.direction === 'down');
+  const acrossHints = hints?.filter((hint) => hint.direction === 'across');
+  const downHints = hints?.filter((hint) => hint.direction === 'down');
 
   return (
     <div>

@@ -8,7 +8,7 @@ import Board from '../../shared/board/board';
 import Link from 'next/link';
 import axios from 'axios';
 import * as consts from '../../config';
-import { makeServer } from '@/app/mocks/server';
+import { makeServer } from '../../../app/mocks/server';
 
 
 export default function Puzzle() {

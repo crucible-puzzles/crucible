@@ -1,7 +1,7 @@
 import React, { useState, useEffect, forwardRef } from 'react';
 
 interface SquareProps {
-  onKeyPress: (event: React.KeyboardEvent<HTMLDivElement>) => void;
+  onKeyPress: (key: String) => void;
   onClick: () => void;
   onBackspace: () => void;
   onBlur: () => void;
@@ -22,9 +22,13 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
     }, [letter]);
 
 
-    const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
-      console.log("CONTENTS FOR SQUARE" + initialContents)
+    const handlePCKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
       const key = event.key;
+      handleKeyPress(key)
+    };
+
+    const handleKeyPress = (key: String) => {
+      console.log("CONTENTS FOR SQUARE" + initialContents)
       if (editorMode || (key !== '.' && letter !== '.')) {
         if (key.length === 1 && key.match(/[a-zA-Z\.]/)) {
           setLetter(key.toUpperCase());
@@ -32,7 +36,7 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
           setLetter('');
           onBackspace(); // Notify Board to move focus backward
         }
-        onKeyPress(event);
+        onKeyPress(key);
       }
     };
 
@@ -53,7 +57,7 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
         data-letter={letter} 
         data-number={number !== undefined && number !== null ? number.toString() : ''}
         tabIndex={0}
-        onKeyDown={handleKeyPress}
+        onKeyDown={handlePCKeyPress}
         onBlur={handleBlur}
         onClick={handleClick}
         style={{
