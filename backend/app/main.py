@@ -64,7 +64,7 @@ def fetch_puzzle(id: int,  db: Session = Depends(get_db)):
 
     structure = []
 
-    for char, idx in enumerate(result["solution"]):
+    for idx, char in enumerate(result["solution"]):
         if char == '.':
             structure.append(idx)
 
