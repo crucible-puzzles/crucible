@@ -13,7 +13,7 @@
     "next": "14.2.1",
     "react": "^18",
     "react-dom": "^18",
-    "simple-keyboard": "^3.7.80"
+    "react-simple-keyboard": "^3.7.80"
   },
   "devDependencies": {
     "@types/node": "20.12.12",

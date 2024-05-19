@@ -9,6 +9,9 @@ import Link from 'next/link';
 import axios from 'axios';
 import * as consts from '../../config';
 import { makeServer } from '../../../app/mocks/server';
+import Keyboard from 'react-simple-keyboard';
+import 'react-simple-keyboard/build/css/index.css';
+
 
 
 export default function Puzzle() {
@@ -62,6 +65,18 @@ export default function Puzzle() {
     return <div>Loading...</div>;
   }
 
+  // TEMP ----
+
+  const onChange = (input: string) => {
+    console.log("Input changed", input);
+  }
+  
+  const onKeyPress = (button: string) => {
+    console.log("Button pressed", button);
+  }  
+
+  // --------
+
   return (
     <div>
       <Link href="/">
@@ -91,6 +106,10 @@ export default function Puzzle() {
             initialStructure={puzzle?.initialStructure}
             initialHints={puzzle?.hints}
             onBoardContentChange={setBoardContents}
+          />
+          <Keyboard
+            onChange={this.onChange}
+            onKeyPress={this.onKeyPress}
           />
           <button onClick={handleSubmit}>Submit</button>
     {showPopup && (

@@ -14,6 +14,7 @@
     "/puzzle/[puzzleId]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
+      "static/css/css-node_modules_react-simple-keyboard_build_css_index_css.css",
       "static/chunks/app/puzzle/[puzzleId]/page.js"
     ]
   }
