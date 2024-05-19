@@ -7,7 +7,7 @@ from database import get_db
 import logging
 
 logging.basicConfig(filename='crucible.log',
-                    level=logging.INFO,
+                    level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S'
                     )
