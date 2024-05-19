@@ -10,10 +10,11 @@ interface SquareProps {
   editorMode: boolean;
   number: number | null;
   initialContents: string;
+  externalLetter?: string; // New prop for external control of letter
 }
 
 const Square = forwardRef<HTMLDivElement, SquareProps>(
-  ({ onKeyPress, onClick, onBackspace, onBlur, isFocused, isHighlighted, editorMode, number, initialContents }, ref) => {
+  ({ onKeyPress, onClick, onBackspace, onBlur, isFocused, isHighlighted, editorMode, number, initialContents, externalLetter }, ref) => {
     const [letter, setLetter] = useState(initialContents);
     const [content, setContent] = useState(initialContents);
 
@@ -21,6 +22,11 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
       setContent(letter)
     }, [letter]);
 
+    useEffect(() => {
+      if(isFocused) {
+        handleKeyPress(externalLetter)
+      }
+    }, [externalLetter]);
 
     const handlePCKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
       const key = event.key;
@@ -58,7 +64,6 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
         data-number={number !== undefined && number !== null ? number.toString() : ''}
         tabIndex={0}
         onKeyDown={handlePCKeyPress}
-        onBlur={handleBlur}
         onClick={handleClick}
         style={{
           width: '50px',

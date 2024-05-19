@@ -23,6 +23,8 @@ export default function Puzzle() {
   const puzzleId = searchParams.get('puzzleId');
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
+  const [isIOS, setIsIOS] = useState(false);
+  const [currentLetter, setCurrentLetter] = useState('');
 
   useEffect(() => {
     const fetchPuzzle = async () => {
@@ -37,6 +39,12 @@ export default function Puzzle() {
 
     fetchPuzzle();
   }, []);
+
+  useEffect(() => {
+    const userAgent = window.navigator.userAgent;
+    setIsIOS(/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream);
+  }, []);
+  
 
   useEffect(() => {
     console.log("PUZZLE: " + JSON.stringify(puzzle))
@@ -65,17 +73,24 @@ export default function Puzzle() {
     return <div>Loading...</div>;
   }
 
-  // TEMP ----
 
   const onChange = (input: string) => {
-    console.log("Input changed", input);
-  }
-  
-  const onKeyPress = (button: string) => {
-    console.log("Button pressed", button);
-  }  
+    if (input.length > 0) {
+      setCurrentLetter(input.slice(-1)); // Takes the last character of the string
+    }
+  };
+    
+  const onKeyPress = (input: string) => {
+    if (input.length > 0) {
+      setCurrentLetter(input.slice(-1)); // Takes the last character of the string
+    }
+  };  
 
-  // --------
+  const onKeyRelease = () => {
+    setCurrentLetter('KEYBOARDINPUT');
+  }
+
+
 
   return (
     <div>
@@ -106,11 +121,25 @@ export default function Puzzle() {
             initialStructure={puzzle?.initialStructure}
             initialHints={puzzle?.hints}
             onBoardContentChange={setBoardContents}
+            externalLetter={currentLetter}
           />
-          <Keyboard
-            onChange={this.onChange}
-            onKeyPress={this.onKeyPress}
-          />
+              <div>
+      {true ? (
+                  <Keyboard
+                  onChange={onChange}
+                  onKeyPress={onKeyPress}
+                  onKeyRelease={onKeyRelease}
+                  layout={{default: [
+                    'Q W E R T Y U I O P',
+                    'A S D F G H J K L',
+                    'Z X C V B N M {bksp}',
+                    ]}}
+                />
+      ) : (
+        <p>not showing keyboard because mac.</p>
+      )}
+    </div>
+
           <button onClick={handleSubmit}>Submit</button>
     {showPopup && (
       <div

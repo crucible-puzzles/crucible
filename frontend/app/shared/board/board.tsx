@@ -11,6 +11,7 @@ interface BoardProps {
   initialStructure: number[]
   initialHints: Hint[]
   onBoardContentChange: (contents: string[]) => void;
+  externalLetter: string;
 }
 
 interface Hint {
@@ -20,7 +21,7 @@ interface Hint {
 }
 
 
-function Board({ boardWidth, boardHeight, editorMode, initialStructure, initialHints, onBoardContentChange }: BoardProps) {
+function Board({ boardWidth, boardHeight, editorMode, initialStructure, initialHints, onBoardContentChange, externalLetter }: BoardProps) {
   const [focusIndex, setFocusIndex] = useState(-1);
   const [focusDirection, setFocusDirection] = useState<'horizontal' | 'vertical'>('vertical');
   const squareRefs = useRef<Array<React.RefObject<HTMLDivElement>>>([]);
@@ -29,6 +30,22 @@ function Board({ boardWidth, boardHeight, editorMode, initialStructure, initialH
   const [hints, setHints] = useState(initialHints);
   const [currentHint, setCurrentHint] = useState<{ number: string; direction: 'down' | 'across' } | null>(null);
   const [selectedHint, setSelectedHint] = useState<{ number: string; direction: 'down' | 'across' } | null>(null);
+  const [letters, setLetters] = useState(Array(boardWidth * boardHeight).fill(''));
+
+  useEffect(() => {
+    if (typeof focusIndex === 'number' && focusIndex >= 0 && focusIndex < letters.length) {
+      if(externalLetter == 'KEYBOARDINPUT') {
+        moveFocus();
+        moveFocusBackward();
+      }
+      else {
+        const updatedLetters = [...letters];
+        updatedLetters[focusIndex] = externalLetter;
+        setLetters(updatedLetters);
+      }
+    }
+  }, [externalLetter]);
+  
 
   useEffect(() => {
     squareRefs.current = Array.from(
@@ -267,6 +284,7 @@ function Board({ boardWidth, boardHeight, editorMode, initialStructure, initialH
         editorMode={editorMode}
         number={squareNumbers[i]}
         initialContents={initialStructure.includes(i) ? '.' : ''}
+        externalLetter={letters[i]}
       />
     );
   };
@@ -287,7 +305,7 @@ function Board({ boardWidth, boardHeight, editorMode, initialStructure, initialH
         {Array.from({ length: boardWidth * boardHeight }, (_, i) => renderSquare(i))}
       </div>
       <div style={{ marginLeft: '50px'}}/>
-      <Hints hints={hints} currentHint={selectedHint} onHintChange={handleHintChange} />
+      {/*<Hints hints={hints} currentHint={selectedHint} onHintChange={handleHintChange} />*/}
     </div>
   );
 }
