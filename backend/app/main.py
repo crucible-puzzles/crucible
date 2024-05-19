@@ -47,14 +47,20 @@ def fetch_puzzle(id: int,  db: Session = Depends(get_db)):
         logger.debug(f"Puzzle {id} requested and no matching record was found")
 
     hint_result_set = db.execute(text("""
-    SELECT Concat(clue, direction) AS clue, 
+    SELECT clue AS number, 
+        CASE 
+            WHEN direction = 'd' THEN 'down' 
+            WHEN direction = 'a' THEN 'across' 
+        END  AS direction, 
         hint 
     FROM   hints 
     WHERE  id = :id 
+    ORDER  BY direction, 
+              number; 
     """), {'id': id}).fetchall()
 
     result = dict(puzzle_resultset)
-    hints = dict(hint_result_set)
+    hints = hint_result_set
 
     structure = []
 
