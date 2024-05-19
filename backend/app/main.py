@@ -2,7 +2,7 @@ from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 from sqlalchemy import select
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from database import get_db
 import logging
 
@@ -80,9 +80,15 @@ def fetch_puzzle(id: int,  db: Session = Depends(get_db)):
     logger.debug(f"returning response {resp}")
     return resp
 
+@app.post("/validate_puzzle/{id}")
+async def validate_puzzle(id: int, request: Request, db: Session = Depends(get_db)):
+    body = dict(await request.json())
 
-@app.post("/puzzle/{id}/{solution}")
-def validate_puzzle(id: int, solution: str, db: Session = Depends(get_db)):
+    if "solution" not in body:
+        return "Invalid request. Solution parameter missing!"
+    
+    solution = body["solution"]
+
     logger.debug(f"Validation for puzzle {id} requested with solution {solution}")
     resultset = db.execute(text("""
     SELECT solution 
@@ -108,5 +114,3 @@ def validate_puzzle(id: int, solution: str, db: Session = Depends(get_db)):
 
     logger.debug(f"Validation for puzzle {id} failed at indices {indices}")
     return {"invalidIndices": indices}
-
-
