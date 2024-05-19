@@ -74,15 +74,19 @@ export default function Puzzle() {
   }
 
 
-  const onChange = (input: string) => {
-    if (input.length > 0) {
-      setCurrentLetter(input.slice(-1)); // Takes the last character of the string
-    }
-  };
+  // const onChange = (input: string) => {
+  //   if (input.length > 0) {
+  //     console.log("NEW ONCHANGE FROM CUSTOM KEYBOARD: " + input)
+  //     setCurrentLetter(input.slice(-1)); // Takes the last character of the string
+  //   }
+  // };
     
   const onKeyPress = (input: string) => {
     if (input.length > 0) {
-      setCurrentLetter(input.slice(-1)); // Takes the last character of the string
+      console.log("NEW ONKEYPRESS FROM CUSTOM KEYBOARD: " + input)
+      const number = Math.floor(1000 + Math.random() * 9000);
+      const newLetter = `${number}${input.slice(-1)}`; 
+      setCurrentLetter(newLetter); // Takes the last character of the string
     }
   };  
 
@@ -126,7 +130,6 @@ export default function Puzzle() {
               <div>
       {true ? (
                   <Keyboard
-                  onChange={onChange}
                   onKeyPress={onKeyPress}
                   onKeyRelease={onKeyRelease}
                   layout={{default: [

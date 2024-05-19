@@ -24,7 +24,8 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
 
     useEffect(() => {
       if(isFocused) {
-        handleKeyPress(externalLetter)
+        console.log("HANDLING KEYPRESS WITHIN SQUARE")
+        handleKeyPress(externalLetter.slice(-1))
       }
     }, [externalLetter]);
 
@@ -38,7 +39,7 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
       if (editorMode || (key !== '.' && letter !== '.')) {
         if (key.length === 1 && key.match(/[a-zA-Z\.]/)) {
           setLetter(key.toUpperCase());
-        } else if (key === 'Backspace') {
+        } else if (key === 'Backspace' || key === '}') {
           setLetter('');
           onBackspace(); // Notify Board to move focus backward
         }

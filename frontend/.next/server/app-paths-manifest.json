@@ -1,4 +1,4 @@
 {
   "/puzzle/[puzzleId]/page": "app/puzzle/[puzzleId]/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js"
+  "/page": "app/page.js"
 }

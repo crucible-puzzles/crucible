@@ -1,6 +1,6 @@
 export const JSON_DATA = {
     id: '1',
-    title: 'The (fake) birthday bash special',
+    title: 'The birthday bash special',
     createdOn: '2024-05-16',
     createdBy: 'The Crucible Team',
     boardHeight: 5,
@@ -10,62 +10,62 @@ export const JSON_DATA = {
         {
             number: '1',
             direction: 'down',
-            text: 'Macaroni & _____'
+            text: 'fiesta (you\'re at one of these right now!)'
         },
         {
             number: '2',
             direction: 'down',
-            text: 'Robert DeNiro second child'
+            text: 'running shoe brand'
         },
         {
             number: '3',
             direction: 'down',
-            text: 'Walgreens rival brand (in Latin America)'
+            text: 'There\'s 7 of them on earth'
         },
         {
             number: '4',
             direction: 'down',
-            text: 'Opposite of Chocolate (not vanilla)'
+            text: 'Slide into these'
         },
         {
             number: '5',
             direction: 'down',
-            text: 'Ice cream flavor'
+            text: 'if you don\'t do this you DIE'
         },
         {
             number: '9',
             direction: 'down',
-            text: 'Popular garment among senior citizens'
+            text: 'Abbreviation for the tiniest state'
         },
         {
             number: '1',
             direction: 'across',
-            text: 'Cereal in Spongebob'
+            text: 'Number 2'
         },
         {
             number: '4',
             direction: 'across',
-            text: 'Type of liquid (bodily)'
+            text: '4 across 4 across revolution'
         },
         {
             number: '6',
             direction: 'across',
-            text: 'The meaning of life, abbr.'
+            text: 'type of Beast'
         },
         {
             number: '7',
             direction: 'across',
-            text: 'Rutgers graduate'
+            text: 'SPORTS ITS IN THE GAME'
         },
         {
             number: '8',
             direction: 'across',
-            text: 'Rutgers graduate (gay)'
+            text: 'plan, abbreviated. maybe common in gaming'
         },
         {
             number: '10',
             direction: 'across',
-            text: 'Eric Andre real name'
+            text: 'youre the ___ to my yang :D'
         }
     ]
 }
