@@ -24,7 +24,7 @@ def read_root():
 def check_health():
     try:
         db = Depends(get_db)
-        db.execute(text("SELECT 1")).fetchone()
+        result = db.execute(text("SELECT 1")).fetchone()
         if result is None or result[0] != 1:
             raise HTTPException(status_code=500, detail="Database check failed")
     except Exception as e:
