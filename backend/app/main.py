@@ -112,5 +112,8 @@ async def validate_puzzle(id: int, request: Request, db: Session = Depends(get_d
         if actual_solution[idx] != char:
             indices.append(idx)
 
+    if indices == []:
+        return True
+
     logger.debug(f"Validation for puzzle {id} failed at indices {indices}")
     return {"invalidIndices": indices}
