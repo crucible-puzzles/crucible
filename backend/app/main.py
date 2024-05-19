@@ -20,6 +20,19 @@ def read_root():
     return {"Hello": "World"}
 
 
+@app.get("/health")
+def check_health():
+    try:
+        db = Depends(get_db)
+        db.execute(text("SELECT 1")).fetchone()
+        if result is None or result[0] != 1:
+            raise HTTPException(status_code=500, detail="Database check failed")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Health check failed: {str(e)}")
+
+    return {"status": "ok", "message": "Application and database are healthy"}
+
+
 @app.get("/puzzle/{id}")
 def fetch_puzzle(id: int,  db: Session = Depends(get_db)):
     logger.debug(f"Information for puzzle {id} requested")
