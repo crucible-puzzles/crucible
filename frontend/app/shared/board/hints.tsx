@@ -32,7 +32,7 @@ const Hints: React.FC<HintsProps> = ({ hints, currentHint, onHintChange }) => {
         <div overflow-y='scroll'>
         {acrossHints.map((hint) => (
           <div key={`${hint.number}-${hint.direction}`}>
-            {hint.number}. <p>{hint.text}</p>
+             <p>{hint.number}. {hint.text}</p>
           </div>
         ))}
         </div> 
@@ -41,7 +41,7 @@ const Hints: React.FC<HintsProps> = ({ hints, currentHint, onHintChange }) => {
         <h3>Down Hints:</h3>
         {downHints.map((hint) => (
           <div key={`${hint.number}-${hint.direction}`}>
-            {hint.number}. <p>{hint.text}</p>
+            <p>{hint.number}. {hint.text}</p>
           </div>
         ))}
       </div>

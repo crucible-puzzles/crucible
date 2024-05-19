@@ -1,7 +1,7 @@
 import next from 'next';
 import React, { useState, useEffect, useRef } from 'react';
 import Hints from './hints';
-import Square from './square';
+import Square from './Square';
 
 
 interface BoardProps {
@@ -9,6 +9,8 @@ interface BoardProps {
   boardHeight: number;
   editorMode: boolean;
   initialStructure: number[]
+  initialHints: Hint[]
+  onBoardContentChange: (contents: string[]) => void;
 }
 
 interface Hint {
@@ -18,13 +20,13 @@ interface Hint {
 }
 
 
-function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
+function Board({ boardWidth, boardHeight, editorMode, initialStructure, initialHints, onBoardContentChange }: BoardProps) {
   const [focusIndex, setFocusIndex] = useState(-1);
   const [focusDirection, setFocusDirection] = useState<'horizontal' | 'vertical'>('vertical');
   const squareRefs = useRef<Array<React.RefObject<HTMLDivElement>>>([]);
   const [highlightedSquares, setHighlightedSquares] = useState<number[]>([]);
   const [squareNumbers, setSquareNumbers] = useState<(number | null)[]>([]);
-  const [hints, setHints] = useState<Hint[]>([]);
+  const [hints, setHints] = useState(initialHints);
   const [currentHint, setCurrentHint] = useState<{ number: string; direction: 'down' | 'across' } | null>(null);
   const [selectedHint, setSelectedHint] = useState<{ number: string; direction: 'down' | 'across' } | null>(null);
 
@@ -78,8 +80,6 @@ function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
           }
         }
       }
-
-      console.log(newHighlightedSquares);
       setHighlightedSquares(newHighlightedSquares);
     };
 
@@ -92,8 +92,15 @@ function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
   }, [boardWidth, boardHeight, highlightedSquares]);
 
   useEffect(() => {
+    onBoardContentChange(getBoardContents())
+  }, [highlightedSquares]);
+
+  useEffect(() => {
     const updateCurrentHint = () => {
-      if (focusIndex >= 0) {
+      if(!editorMode) {
+        return;
+      }
+      else if (focusIndex >= 0) {
         const currentRow = Math.floor(focusIndex / boardWidth);
         const currentCol = focusIndex % boardWidth;
         //console.log("Focus direction: " + focusDirection + ", current row: " + currentRow + ", current column: " + currentCol + ", focusIndex: " + focusIndex);
@@ -192,7 +199,6 @@ function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
   };
 
   const handleKeyPress = (event: React.KeyboardEvent, index: number) => {
-    console.log("BOARD KEY PRESS");
     const key = event.key;
     if (key.length === 1 && key.match(/[a-zA-Z\.]/)) {
       moveFocus();
@@ -200,7 +206,6 @@ function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
   };
 
   const handleClick = (index: number) => {
-    console.log("BOARD CLICK");
     if (index === focusIndex) {
       setFocusDirection(focusDirection === 'horizontal' ? 'vertical' : 'horizontal');
     } else {
@@ -234,8 +239,22 @@ function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
     return squareNumbers;
   };
 
+  const getBoardContents = () => {
+    const contents: string[] = [];
+    for (let i = 0; i < squareRefs.current.length; i++) {
+      if (squareRefs.current[i].current) {
+        const dataLetter = squareRefs.current[i].current?.getAttribute('data-letter');
+        if (typeof dataLetter === 'string') {
+          contents.push(dataLetter);
+        }
+      }
+    }
+    return contents;
+  };
+
 
   const renderSquare = (i: number) => {
+    console.log("INITIALSTRUCTURE:" + initialStructure)
     return (
       <Square
         key={i}
@@ -248,6 +267,7 @@ function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
         isHighlighted={highlightedSquares.includes(i)}
         editorMode={editorMode}
         number={squareNumbers[i]}
+        initialContents={initialStructure.includes(i) ? '.' : ''}
       />
     );
   };
@@ -256,6 +276,7 @@ function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
     <div style={{
       display:'flex', 
       flexDirection:'row',
+      alignItems: 'flex-start'
     }}>
       <div
         style={{

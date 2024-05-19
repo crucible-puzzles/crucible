@@ -1,4 +1,4 @@
-// File: /Users/evanvonoehsen/Develop/puzzpack/frontend/app/layout.tsx
+// File: /Users/evanvonoehsen/Develop/crucible/frontend/app/layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Author from '../../../shared/components/author';
 import Title from '../../../shared/components/title';
+
 import Board from '../../shared/board/board';
 import Link from 'next/link';
 

@@ -9,12 +9,13 @@ interface SquareProps {
   isHighlighted: boolean;
   editorMode: boolean;
   number: number | null;
+  initialContents: string;
 }
 
 const Square = forwardRef<HTMLDivElement, SquareProps>(
-  ({ onKeyPress, onClick, onBackspace, onBlur, isFocused, isHighlighted, editorMode, number }, ref) => {
-    const [letter, setLetter] = useState('');
-    const [content, setContent] = useState('');
+  ({ onKeyPress, onClick, onBackspace, onBlur, isFocused, isHighlighted, editorMode, number, initialContents }, ref) => {
+    const [letter, setLetter] = useState(initialContents);
+    const [content, setContent] = useState(initialContents);
 
     useEffect(() => {
       setContent(letter)
@@ -22,10 +23,8 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
 
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
-      console.log("SQUARE KEY PRESS");
+      console.log("CONTENTS FOR SQUARE" + initialContents)
       const key = event.key;
-      console.log("KEY PRESSED UH YUH: " + key);
-      console.log("CURRENT CONTENT: " + content);
       if (editorMode || (key !== '.' && letter !== '.')) {
         if (key.length === 1 && key.match(/[a-zA-Z\.]/)) {
           setLetter(key.toUpperCase());
@@ -39,7 +38,6 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
 
     const handleClick = () => {
       if (editorMode || content !== '.') {
-        console.log("SQUARE CLICKED YAY");
         onClick(); // Call onClick when the square is clicked
       }
     };
@@ -81,7 +79,8 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
               fontSize: '12px',
               lineHeight: '12px',
               fontFamily: 'Kadwa',
-              fontWeight: 400
+              fontWeight: 400,
+              userSelect: 'none',
             }}
           >
             {number}
