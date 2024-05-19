@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predeploy": "npm run dev",
+    "deploy" : "gh-pages -d build",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -21,6 +23,7 @@
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.1",
+    "gh-pages": "^6.1.1",
     "miragejs": "^0.1.48",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
