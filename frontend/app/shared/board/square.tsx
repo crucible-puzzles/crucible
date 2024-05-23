@@ -1,7 +1,7 @@
 import React, { useState, useEffect, forwardRef } from 'react';
 
 interface SquareProps {
-  onKeyPress: (event: React.KeyboardEvent<HTMLDivElement>) => void;
+  onKeyPress: (key: String) => void;
   onClick: () => void;
   onBackspace: () => void;
   onBlur: () => void;
@@ -9,37 +9,46 @@ interface SquareProps {
   isHighlighted: boolean;
   editorMode: boolean;
   number: number | null;
+  initialContents: string;
+  externalLetter?: string; // New prop for external control of letter
 }
 
 const Square = forwardRef<HTMLDivElement, SquareProps>(
-  ({ onKeyPress, onClick, onBackspace, onBlur, isFocused, isHighlighted, editorMode, number }, ref) => {
-    const [letter, setLetter] = useState('');
-    const [content, setContent] = useState('');
+  ({ onKeyPress, onClick, onBackspace, onBlur, isFocused, isHighlighted, editorMode, number, initialContents, externalLetter }, ref) => {
+    const [letter, setLetter] = useState(initialContents);
+    const [content, setContent] = useState(initialContents);
 
     useEffect(() => {
       setContent(letter)
     }, [letter]);
 
+    useEffect(() => {
+      if(isFocused) {
+        console.log("HANDLING KEYPRESS WITHIN SQUARE")
+        handleKeyPress(externalLetter.slice(-1))
+      }
+    }, [externalLetter]);
 
-    const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
-      console.log("SQUARE KEY PRESS");
+    const handlePCKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
       const key = event.key;
-      console.log("KEY PRESSED UH YUH: " + key);
-      console.log("CURRENT CONTENT: " + content);
+      handleKeyPress(key)
+    };
+
+    const handleKeyPress = (key: String) => {
+      console.log("CONTENTS FOR SQUARE" + initialContents)
       if (editorMode || (key !== '.' && letter !== '.')) {
         if (key.length === 1 && key.match(/[a-zA-Z\.]/)) {
           setLetter(key.toUpperCase());
-        } else if (key === 'Backspace') {
+        } else if (key === 'Backspace' || key === '}') {
           setLetter('');
           onBackspace(); // Notify Board to move focus backward
         }
-        onKeyPress(event);
+        onKeyPress(key);
       }
     };
 
     const handleClick = () => {
       if (editorMode || content !== '.') {
-        console.log("SQUARE CLICKED YAY");
         onClick(); // Call onClick when the square is clicked
       }
     };
@@ -55,8 +64,7 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
         data-letter={letter} 
         data-number={number !== undefined && number !== null ? number.toString() : ''}
         tabIndex={0}
-        onKeyDown={handleKeyPress}
-        onBlur={handleBlur}
+        onKeyDown={handlePCKeyPress}
         onClick={handleClick}
         style={{
           width: '50px',
@@ -81,7 +89,8 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
               fontSize: '12px',
               lineHeight: '12px',
               fontFamily: 'Kadwa',
-              fontWeight: 400
+              fontWeight: 400,
+              userSelect: 'none',
             }}
           >
             {number}

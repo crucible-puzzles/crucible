@@ -9,6 +9,9 @@ interface BoardProps {
   boardHeight: number;
   editorMode: boolean;
   initialStructure: number[]
+  initialHints: Hint[]
+  onBoardContentChange: (contents: string[]) => void;
+  externalLetter: string;
 }
 
 interface Hint {
@@ -18,15 +21,26 @@ interface Hint {
 }
 
 
-function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
+function Board({ boardWidth, boardHeight, editorMode, initialStructure, initialHints, onBoardContentChange, externalLetter }: BoardProps) {
   const [focusIndex, setFocusIndex] = useState(-1);
   const [focusDirection, setFocusDirection] = useState<'horizontal' | 'vertical'>('vertical');
   const squareRefs = useRef<Array<React.RefObject<HTMLDivElement>>>([]);
   const [highlightedSquares, setHighlightedSquares] = useState<number[]>([]);
   const [squareNumbers, setSquareNumbers] = useState<(number | null)[]>([]);
-  const [hints, setHints] = useState<Hint[]>([]);
+  const [hints, setHints] = useState(initialHints);
   const [currentHint, setCurrentHint] = useState<{ number: string; direction: 'down' | 'across' } | null>(null);
   const [selectedHint, setSelectedHint] = useState<{ number: string; direction: 'down' | 'across' } | null>(null);
+  const [letters, setLetters] = useState(Array(boardWidth * boardHeight).fill(''));
+
+  useEffect(() => {
+    if (typeof focusIndex === 'number' && focusIndex >= 0 && focusIndex < letters.length) {
+      console.log("HERE IS THE LETTER RECEIVED FROM TEH CUSTOM KEYBOARD!" + externalLetter)
+        const updatedLetters = [...letters];
+        updatedLetters[focusIndex] = externalLetter;
+        setLetters(updatedLetters);
+    }
+  }, [externalLetter]);
+  
 
   useEffect(() => {
     squareRefs.current = Array.from(
@@ -78,8 +92,6 @@ function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
           }
         }
       }
-
-      console.log(newHighlightedSquares);
       setHighlightedSquares(newHighlightedSquares);
     };
 
@@ -92,8 +104,15 @@ function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
   }, [boardWidth, boardHeight, highlightedSquares]);
 
   useEffect(() => {
+    onBoardContentChange(getBoardContents())
+  }, [highlightedSquares]);
+
+  useEffect(() => {
     const updateCurrentHint = () => {
-      if (focusIndex >= 0) {
+      // if(!editorMode) {
+      //   return;
+      // }
+       if (focusIndex >= 0) {
         const currentRow = Math.floor(focusIndex / boardWidth);
         const currentCol = focusIndex % boardWidth;
         //console.log("Focus direction: " + focusDirection + ", current row: " + currentRow + ", current column: " + currentCol + ", focusIndex: " + focusIndex);
@@ -168,6 +187,10 @@ function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
   };
 
   const moveFocusBackward = () => {
+    if(focusIndex == 1) 
+    {
+      return;
+    }
     console.log("BOARD MOVE FOCUS BACKWARD");
     let prevIndex = focusIndex;
     do {
@@ -191,16 +214,13 @@ function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
     setFocusIndex(prevIndex);
   };
 
-  const handleKeyPress = (event: React.KeyboardEvent, index: number) => {
-    console.log("BOARD KEY PRESS");
-    const key = event.key;
+  const handleKeyPress = (key: String, index: number) => {
     if (key.length === 1 && key.match(/[a-zA-Z\.]/)) {
       moveFocus();
     }
   };
 
   const handleClick = (index: number) => {
-    console.log("BOARD CLICK");
     if (index === focusIndex) {
       setFocusDirection(focusDirection === 'horizontal' ? 'vertical' : 'horizontal');
     } else {
@@ -234,13 +254,27 @@ function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
     return squareNumbers;
   };
 
+  const getBoardContents = () => {
+    const contents: string[] = [];
+    for (let i = 0; i < squareRefs.current.length; i++) {
+      if (squareRefs.current[i].current) {
+        const dataLetter = squareRefs.current[i].current?.getAttribute('data-letter');
+        if (typeof dataLetter === 'string') {
+          contents.push(dataLetter);
+        }
+      }
+    }
+    return contents;
+  };
+
 
   const renderSquare = (i: number) => {
+    console.log("INITIALSTRUCTURE:" + initialStructure)
     return (
       <Square
         key={i}
         ref={squareRefs.current[i]}
-        onKeyPress={(event: React.KeyboardEvent<HTMLDivElement>) => handleKeyPress(event, i)}
+        onKeyPress={(key: String) => handleKeyPress(key, i)}
         onClick={() => handleClick(i)}
         onBlur={() => handleSquareBlur(i)}
         onBackspace={() => moveFocusBackward()}
@@ -248,6 +282,8 @@ function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
         isHighlighted={highlightedSquares.includes(i)}
         editorMode={editorMode}
         number={squareNumbers[i]}
+        initialContents={initialStructure.includes(i) ? '.' : ''}
+        externalLetter={letters[i]}
       />
     );
   };
@@ -255,7 +291,8 @@ function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
   return (
     <div style={{
       display:'flex', 
-      flexDirection:'row',
+      flexDirection:'column',
+      alignItems: 'flex-start'
     }}>
       <div
         style={{
@@ -267,7 +304,7 @@ function Board({ boardWidth, boardHeight, editorMode }: BoardProps) {
         {Array.from({ length: boardWidth * boardHeight }, (_, i) => renderSquare(i))}
       </div>
       <div style={{ marginLeft: '50px'}}/>
-      <Hints hints={hints} currentHint={selectedHint} onHintChange={handleHintChange} />
+      {<Hints hints={hints} currentHint={selectedHint} onHintChange={handleHintChange} />}
     </div>
   );
 }
