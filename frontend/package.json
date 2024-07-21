@@ -11,11 +11,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.2.6",
     "axios": "^1.6.8",
     "next": "14.2.1",
     "react": "^18",
     "react-dom": "^18",
-    "react-simple-keyboard": "^3.7.80"
+    "react-redux": "^9.1.2",
+    "react-simple-keyboard": "^3.7.80",
+    "redux": "^5.0.1"
   },
   "devDependencies": {
     "@types/node": "20.12.12",

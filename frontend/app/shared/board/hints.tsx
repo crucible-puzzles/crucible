@@ -22,64 +22,40 @@ const Hints: React.FC<HintsProps> = ({ hints, currentHint, onHintChange }) => {
     }
   };
 
-  const matchingHint = currentHint ? hints.find(hint => 
-    hint.number === currentHint.number && hint.direction === currentHint.direction
-  ) : null;
+  const acrossHints = hints.filter((hint) => hint.direction === 'across');
+  const downHints = hints.filter((hint) => hint.direction === 'down');
 
-  const acrossHints = hints?.filter((hint) => hint.direction === 'across');
-  const downHints = hints?.filter((hint) => hint.direction === 'down');
   return (
     <div>
-    {currentHint ? (
-            <div>
-              <p>
-                {currentHint.number} {currentHint.direction}
-              </p>
-              <div>
-    </div>
-            </div>
-          ) : <p>No hint selected</p>}
-      {matchingHint ? (
-        <div key={`${matchingHint.number}-${matchingHint.direction}`}>
-          <p>{matchingHint.text}</p>
+      <div>
+        <h3>Across Hints:</h3>
+        <div overflow-y='scroll'>
+        {acrossHints.map((hint) => (
+          <div key={`${hint.number}-${hint.direction}`}>
+             <p>{hint.number}. {hint.text}</p>
+          </div>
+        ))}
+        </div> 
+      </div>
+      <div>
+        <h3>Down Hints:</h3>
+        {downHints.map((hint) => (
+          <div key={`${hint.number}-${hint.direction}`}>
+            <p>{hint.number}. {hint.text}</p>
+          </div>
+        ))}
+      </div>
+      {currentHint && (
+        <div>
+          <h3>Edit Hint:</h3>
+          <p>
+            {currentHint.number} {currentHint.direction}
+          </p>
+          <textarea value={hintText} onChange={handleHintChange} />
         </div>
-      ) : (
-        <p>No hint selected</p>
       )}
     </div>
-  )
-
-  // return (
-  //   <div>
-  //     <div>
-  //       <h3>Across Hints:</h3>
-  //       <div overflow-y='scroll'>
-  //       {acrossHints.map((hint) => (
-  //         <div key={`${hint.number}-${hint.direction}`}>
-  //            <p>{hint.number}. {hint.text}</p>
-  //         </div>
-  //       ))}
-  //       </div> 
-  //     </div>
-  //     <div>
-  //       <h3>Down Hints:</h3>
-  //       {downHints.map((hint) => (
-  //         <div key={`${hint.number}-${hint.direction}`}>
-  //           <p>{hint.number}. {hint.text}</p>
-  //         </div>
-  //       ))}
-  //     </div>
-  //     {currentHint && (
-  //       <div>
-  //         <h3>Edit Hint:</h3>
-  //         <p>
-  //           {currentHint.number} {currentHint.direction}
-  //         </p>
-  //         <textarea value={hintText} onChange={handleHintChange} />
-  //       </div>
-  //     )}
-  //   </div>
-  // );
+  );
 };
 
 export default Hints;

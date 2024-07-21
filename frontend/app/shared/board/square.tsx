@@ -10,7 +10,7 @@ interface SquareProps {
   editorMode: boolean;
   number: number | null;
   initialContents: string;
-  externalLetter?: string; // New prop for external control of letter
+  externalLetter: string; // New prop for external control of letter
 }
 
 const Square = forwardRef<HTMLDivElement, SquareProps>(
@@ -24,8 +24,7 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
 
     useEffect(() => {
       if(isFocused) {
-        console.log("HANDLING KEYPRESS WITHIN SQUARE")
-        handleKeyPress(externalLetter.slice(-1))
+        handleKeyPress(externalLetter)
       }
     }, [externalLetter]);
 
@@ -39,7 +38,7 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
       if (editorMode || (key !== '.' && letter !== '.')) {
         if (key.length === 1 && key.match(/[a-zA-Z\.]/)) {
           setLetter(key.toUpperCase());
-        } else if (key === 'Backspace' || key === '}') {
+        } else if (key === 'Backspace') {
           setLetter('');
           onBackspace(); // Notify Board to move focus backward
         }

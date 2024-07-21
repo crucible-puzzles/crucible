@@ -34,10 +34,15 @@ function Board({ boardWidth, boardHeight, editorMode, initialStructure, initialH
 
   useEffect(() => {
     if (typeof focusIndex === 'number' && focusIndex >= 0 && focusIndex < letters.length) {
-      console.log("HERE IS THE LETTER RECEIVED FROM TEH CUSTOM KEYBOARD!" + externalLetter)
+      if(externalLetter == 'KEYBOARDINPUT') {
+        moveFocus();
+        moveFocusBackward();
+      }
+      else {
         const updatedLetters = [...letters];
         updatedLetters[focusIndex] = externalLetter;
         setLetters(updatedLetters);
+      }
     }
   }, [externalLetter]);
   
@@ -109,10 +114,10 @@ function Board({ boardWidth, boardHeight, editorMode, initialStructure, initialH
 
   useEffect(() => {
     const updateCurrentHint = () => {
-      // if(!editorMode) {
-      //   return;
-      // }
-       if (focusIndex >= 0) {
+      if(!editorMode) {
+        return;
+      }
+      else if (focusIndex >= 0) {
         const currentRow = Math.floor(focusIndex / boardWidth);
         const currentCol = focusIndex % boardWidth;
         //console.log("Focus direction: " + focusDirection + ", current row: " + currentRow + ", current column: " + currentCol + ", focusIndex: " + focusIndex);
@@ -187,10 +192,6 @@ function Board({ boardWidth, boardHeight, editorMode, initialStructure, initialH
   };
 
   const moveFocusBackward = () => {
-    if(focusIndex == 1) 
-    {
-      return;
-    }
     console.log("BOARD MOVE FOCUS BACKWARD");
     let prevIndex = focusIndex;
     do {
@@ -291,7 +292,7 @@ function Board({ boardWidth, boardHeight, editorMode, initialStructure, initialH
   return (
     <div style={{
       display:'flex', 
-      flexDirection:'column',
+      flexDirection:'row',
       alignItems: 'flex-start'
     }}>
       <div
@@ -304,7 +305,7 @@ function Board({ boardWidth, boardHeight, editorMode, initialStructure, initialH
         {Array.from({ length: boardWidth * boardHeight }, (_, i) => renderSquare(i))}
       </div>
       <div style={{ marginLeft: '50px'}}/>
-      {<Hints hints={hints} currentHint={selectedHint} onHintChange={handleHintChange} />}
+      {/*<Hints hints={hints} currentHint={selectedHint} onHintChange={handleHintChange} />*/}
     </div>
   );
 }
