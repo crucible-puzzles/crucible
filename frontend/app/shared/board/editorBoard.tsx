@@ -1,7 +1,7 @@
 import next from 'next';
 import React, { useState, useEffect, useRef, useMemo, forwardRef, useImperativeHandle } from 'react';
 import Hints from './hints';
-import Square from './square';
+import EditorSquare from './editorSquare';
 
 
 interface BoardProps {
@@ -22,7 +22,7 @@ interface Hint {
 }
 
 
-const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((props, ref) => {
+const EditorBoard = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((props, ref) => {
   const { boardWidth, boardHeight, editorMode, initialStructure, initialSolution, initialHints, onBoardContentChange, externalLetter } = props;
   const [focusIndex, setFocusIndex] = useState(-1);
   const [focusDirection, setFocusDirection] = useState<'horizontal' | 'vertical'>('vertical');
@@ -248,23 +248,15 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
 
 
   const moveFocus = () => {
-    console.log("BOARD MOVE FOCUS, direction:", focusDirection);
+    console.log("EDITOR BOARD MOVE FOCUS, direction:", focusDirection);
     const currentRow = Math.floor(focusIndex / boardWidth);
     const currentCol = focusIndex % boardWidth;
     let nextIndex = focusIndex;
-    const blackSquares = new Set(initialStructure);
     
     if (focusDirection === 'horizontal') {
       // Move to next column in same row
       if (currentCol < boardWidth - 1) {
         nextIndex = currentRow * boardWidth + (currentCol + 1);
-        
-        // Check if next square is black
-        if (blackSquares.has(nextIndex)) {
-          console.log("Next square is black, not moving");
-          return;
-        }
-        
         console.log("Moving horizontally to index:", nextIndex);
         setFocusIndex(nextIndex);
       } else {
@@ -274,13 +266,6 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
       // Move to next row in same column
       if (currentRow < boardHeight - 1) {
         nextIndex = (currentRow + 1) * boardWidth + currentCol;
-        
-        // Check if next square is black
-        if (blackSquares.has(nextIndex)) {
-          console.log("Next square is black, not moving");
-          return;
-        }
-        
         console.log("Moving vertically to index:", nextIndex);
         setFocusIndex(nextIndex);
       } else {
@@ -290,26 +275,20 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
   };
 
   const moveFocusBackward = () => {
-    console.log("BOARD MOVE FOCUS BACKWARD");
+    console.log("EDITOR BOARD MOVE FOCUS BACKWARD");
     let prevIndex = focusIndex;
-    do {
-      if (focusDirection === 'horizontal') {
-        if (focusIndex > 0) {
-          prevIndex = prevIndex - 1;
-        }
-      } else {
-        if (focusIndex > 0) {
-          // prevIndex = (prevIndex - boardWidth + boardWidth * boardHeight) % (boardWidth * boardHeight);
-          // if (prevIndex > focusIndex) {
-          //   prevIndex = Math.max(prevIndex - 1, 0);
-          // }
-          prevIndex = prevIndex - boardWidth;
-          if(prevIndex < 0) {
-            prevIndex = prevIndex + boardWidth * boardHeight - 1;
-          }
+    if (focusDirection === 'horizontal') {
+      if (focusIndex > 0) {
+        prevIndex = prevIndex - 1;
+      }
+    } else {
+      if (focusIndex > 0) {
+        prevIndex = prevIndex - boardWidth;
+        if(prevIndex < 0) {
+          prevIndex = prevIndex + boardWidth * boardHeight - 1;
         }
       }
-    } while (!editorMode && squareRefs.current[prevIndex].current?.textContent === '.');
+    }
     setFocusIndex(prevIndex);
   };
 
@@ -333,50 +312,42 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
   const handleArrowKey = (direction: 'up' | 'down' | 'left' | 'right') => {
     const currentRow = Math.floor(focusIndex / boardWidth);
     const currentCol = focusIndex % boardWidth;
-    const blackSquares = new Set(initialStructure);
     let nextIndex = focusIndex;
 
+    // In editor mode, allow navigation to all squares including black ones
     switch (direction) {
       case 'up':
         if (currentRow > 0) {
           nextIndex = (currentRow - 1) * boardWidth + currentCol;
-          if (!blackSquares.has(nextIndex)) {
-            setFocusIndex(nextIndex);
-            setFocusDirection('vertical');
-          }
+          setFocusIndex(nextIndex);
+          setFocusDirection('vertical');
         }
         break;
       case 'down':
         if (currentRow < boardHeight - 1) {
           nextIndex = (currentRow + 1) * boardWidth + currentCol;
-          if (!blackSquares.has(nextIndex)) {
-            setFocusIndex(nextIndex);
-            setFocusDirection('vertical');
-          }
+          setFocusIndex(nextIndex);
+          setFocusDirection('vertical');
         }
         break;
       case 'left':
         if (currentCol > 0) {
           nextIndex = currentRow * boardWidth + (currentCol - 1);
-          if (!blackSquares.has(nextIndex)) {
-            setFocusIndex(nextIndex);
-            setFocusDirection('horizontal');
-          }
+          setFocusIndex(nextIndex);
+          setFocusDirection('horizontal');
         }
         break;
       case 'right':
         if (currentCol < boardWidth - 1) {
           nextIndex = currentRow * boardWidth + (currentCol + 1);
-          if (!blackSquares.has(nextIndex)) {
-            setFocusIndex(nextIndex);
-            setFocusDirection('horizontal');
-          }
+          setFocusIndex(nextIndex);
+          setFocusDirection('horizontal');
         }
         break;
     }
   };
 
-  const handleClick = (index: number) => {
+  const handleClick = (index: number, isTabToggle: boolean = false) => {
     const row = Math.floor(index / boardWidth);
     const col = index % boardWidth;
     const blackSquares = new Set(initialStructure);
@@ -392,8 +363,8 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
     const isIntersection = isPartOfHorizontalWord && isPartOfVerticalWord;
     
     if (index === focusIndex) {
-      // Clicking the same square - only toggle direction if at an intersection
-      if (isIntersection) {
+      // If Tab was pressed or clicking the same square, toggle direction
+      if (isTabToggle || isIntersection) {
         const newDirection = focusDirection === 'horizontal' ? 'vertical' : 'horizontal';
         setFocusDirection(newDirection);
         
@@ -467,11 +438,12 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
     const initialContent = initialStructure.includes(i) ? '.' : (letters[i] || '');
     
     return (
-      <Square
+      <EditorSquare
         key={i}
         ref={squareRefs.current[i]}
         onKeyPress={(key: String) => handleKeyPress(key, i)}
-        onClick={() => handleClick(i)}
+        onClick={() => handleClick(i, false)}
+        onTabToggle={() => handleClick(i, true)}
         onBlur={() => handleSquareBlur(i)}
         onBackspace={() => moveFocusBackward()}
         onArrowKey={handleArrowKey}
@@ -506,6 +478,6 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
   );
 });
 
-Board.displayName = 'Board';
+EditorBoard.displayName = 'EditorBoard';
 
-export default Board;
+export default EditorBoard;

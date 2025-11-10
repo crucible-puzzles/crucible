@@ -3,6 +3,7 @@ import React, { useState, useEffect, forwardRef } from 'react';
 interface SquareProps {
   onKeyPress: (key: String) => void;
   onClick: () => void;
+  onTabToggle: () => void;
   onBackspace: () => void;
   onBlur: () => void;
   onArrowKey: (direction: 'up' | 'down' | 'left' | 'right') => void;
@@ -11,11 +12,11 @@ interface SquareProps {
   editorMode: boolean;
   number: number | null;
   initialContents: string;
-  externalLetter: string; // New prop for external control of letter
+  externalLetter: string;
 }
 
-const Square = forwardRef<HTMLDivElement, SquareProps>(
-  ({ onKeyPress, onClick, onBackspace, onBlur, onArrowKey, isFocused, isHighlighted, editorMode, number, initialContents, externalLetter }, ref) => {
+const EditorSquare = forwardRef<HTMLDivElement, SquareProps>(
+  ({ onKeyPress, onClick, onTabToggle, onBackspace, onBlur, onArrowKey, isFocused, isHighlighted, editorMode, number, initialContents, externalLetter }, ref) => {
     const [letter, setLetter] = useState(initialContents);
     const [content, setContent] = useState(initialContents);
 
@@ -37,14 +38,14 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
     const handlePCKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
       const key = event.key;
       
-      // Handle Tab key to toggle direction (only at intersections)
+      // Handle Tab key to toggle direction
       if (key === 'Tab') {
-        event.preventDefault(); // Prevent default tab behavior
-        onClick(); // This will toggle direction if at intersection
+        event.preventDefault();
+        onTabToggle();
         return;
       }
       
-      // Handle arrow keys for navigation
+      // Handle arrow keys for navigation - always allow in editor mode
       if (key === 'ArrowUp') {
         event.preventDefault();
         onArrowKey('up');
@@ -70,30 +71,38 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
     };
 
     const handleKeyPress = (key: String) => {
-      console.log("Square handleKeyPress called with key:", key, "initialContents:", initialContents);
+      console.log("EditorSquare handleKeyPress called with key:", key, "initialContents:", initialContents);
       if (editorMode || (key !== '.' && letter !== '.')) {
         if (key.length === 1 && key.match(/[a-zA-Z\.]/)) {
           setLetter(key.toUpperCase());
-          console.log("Square calling onKeyPress callback");
+          console.log("EditorSquare calling onKeyPress callback");
           onKeyPress(key);
         } else if (key === 'Backspace') {
           setLetter('');
-          onBackspace(); // Notify Board to move focus backward
-          console.log("Square calling onKeyPress callback for Backspace");
+          onBackspace();
+          console.log("EditorSquare calling onKeyPress callback for Backspace");
           onKeyPress(key);
         }
       }
     };
 
     const handleClick = () => {
-      if (editorMode || content !== '.') {
-        onClick(); // Call onClick when the square is clicked
-      }
+      // In editor mode, allow clicking on all squares including black ones
+      onClick();
     };
 
     const handleBlur = () => {
-      console.log("SQUARE BLURRED!");
+      console.log("EDITOR SQUARE BLURRED!");
       onBlur();
+    };
+
+    // Determine background color
+    // Black squares (content === '.') turn grey when focused
+    const getBackgroundColor = () => {
+      if (content === '.') {
+        return isFocused ? '#808080' : 'black';
+      }
+      return isFocused ? '#4A90E2' : isHighlighted ? '#E8F4FF' : 'white';
     };
 
     return (
@@ -115,7 +124,7 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
           fontStyle: 'normal',
           userSelect: 'none',
           outline: 'none',
-          backgroundColor: isFocused ? '#4A90E2' : isHighlighted ? '#E8F4FF' : content === '.' ? 'black' : 'white'
+          backgroundColor: getBackgroundColor()
         }}
       >
         {number !== null && (
@@ -152,4 +161,6 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
   }
 );
 
-export default Square;
+EditorSquare.displayName = 'EditorSquare';
+
+export default EditorSquare;
