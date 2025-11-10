@@ -25,7 +25,7 @@ interface Hint {
 const EditorBoard = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((props, ref) => {
   const { boardWidth, boardHeight, editorMode, initialStructure, initialSolution, initialHints, onBoardContentChange, externalLetter } = props;
   const [focusIndex, setFocusIndex] = useState(-1);
-  const [focusDirection, setFocusDirection] = useState<'horizontal' | 'vertical'>('vertical');
+  const [focusDirection, setFocusDirection] = useState<'horizontal' | 'vertical'>('horizontal');
   const squareRefs = useRef<Array<React.RefObject<HTMLDivElement>>>([]);
   const [highlightedSquares, setHighlightedSquares] = useState<number[]>([]);
   const [squareNumbers, setSquareNumbers] = useState<(number | null)[]>([]);
