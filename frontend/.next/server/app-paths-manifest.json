@@ -1,5 +1,0 @@
-{
-  "/page": "app/page.js",
-  "/editor/[puzzleId]/page": "app/editor/[puzzleId]/page.js",
-  "/puzzle/[puzzleId]/page": "app/puzzle/[puzzleId]/page.js"
-}
