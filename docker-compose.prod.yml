@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: crucible-postgres
+    environment:
+      POSTGRES_DB: crucible
+      POSTGRES_USER: crucible_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change_this_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - crucible-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crucible_user -d crucible"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: crucible-backend
+    environment:
+      DATABASE_URL: postgresql://crucible_user:${DB_PASSWORD:-change_this_password}@postgres:5432/crucible
+      SECRET_KEY: ${SECRET_KEY:-generate_a_secure_secret_key_here}
+      ENVIRONMENT: production
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      CORS_ORIGINS: ${FRONTEND_URL:-http://localhost}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - crucible-network
+    restart: unless-stopped
+    volumes:
+      - ./backend/crucible.log:/app/crucible.log
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: crucible-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: ${BACKEND_URL:-http://localhost:8000}
+    depends_on:
+      - backend
+    networks:
+      - crucible-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: crucible-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - crucible-network
+    restart: unless-stopped
+
+networks:
+  crucible-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
