@@ -282,9 +282,8 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
         console.log("Moving horizontally to index:", nextIndex);
         setFocusIndex(nextIndex);
         
-        // MOBILE FIX: Keep mobile input focused when moving programmatically
+        // MOBILE FIX: Match deletion behavior exactly - immediate refocus after setFocusIndex
         if (isMobile && mobileInputRef.current) {
-          // Use setTimeout to ensure focus happens after state update
           setTimeout(() => {
             mobileInputRef.current?.focus();
           }, 0);
@@ -306,9 +305,8 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
         console.log("Moving vertically to index:", nextIndex);
         setFocusIndex(nextIndex);
         
-        // MOBILE FIX: Keep mobile input focused when moving programmatically
+        // MOBILE FIX: Match deletion behavior exactly - immediate refocus after setFocusIndex
         if (isMobile && mobileInputRef.current) {
-          // Use setTimeout to ensure focus happens after state update
           setTimeout(() => {
             mobileInputRef.current?.focus();
           }, 0);
@@ -378,6 +376,12 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
         handleKeyPress(lastChar, focusIndex);
         // Clear input for next character
         event.target.value = '';
+        
+        // CRITICAL FIX: Immediately refocus mobile input after processing
+        // This ensures keyboard stays up when advancing forward
+        if (mobileInputRef.current) {
+          mobileInputRef.current.focus();
+        }
       }
     }
   };
