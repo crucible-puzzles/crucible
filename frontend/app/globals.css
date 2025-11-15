@@ -38,11 +38,13 @@ button, input[type="submit"] {
   padding: 4px 8px;
   border: 1px solid #828282;
   background-color: #fff;
+  color: #000;
   cursor: pointer;
 }
 
 button:hover, input[type="submit"]:hover {
   background-color: #f6f6ef;
+  color: #000;
 }
 
 input[type="text"],

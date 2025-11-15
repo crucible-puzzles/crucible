@@ -183,8 +183,11 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
               width: '100%',
               height: '100%',
               opacity: 0,
-              pointerEvents: 'none',
+              border: 'none',
+              background: 'transparent',
               fontSize: '16px', // Prevents zoom on iOS
+              color: 'transparent',
+              caretColor: 'transparent',
             }}
             aria-hidden="true"
           />
