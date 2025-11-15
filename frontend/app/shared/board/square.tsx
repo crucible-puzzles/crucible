@@ -89,15 +89,22 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
     };
 
     const handleKeyPress = (key: String) => {
+      console.log('handleKeyPress called, editorMode:', editorMode, 'key:', key, 'letter:', letter);
       if (editorMode || (key !== '.' && letter !== '.')) {
         if (key.length === 1 && key.match(/[a-zA-Z\.]/)) {
-          setLetter(key.toUpperCase());
+          console.log('Valid letter, updating state and calling onKeyPress');
+          // Don't update local state - let the Board handle it via externalLetter prop
+          // setLetter(key.toUpperCase());
           onKeyPress(key);
         } else if (key === 'Backspace') {
-          setLetter('');
+          console.log('Backspace pressed');
+          // Don't update local state - let the Board handle it
+          // setLetter('');
           onBackspace(); // Notify Board to move focus backward
           onKeyPress(key);
         }
+      } else {
+        console.log('Condition failed, not processing key');
       }
     };
 
@@ -133,10 +140,14 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
 
     const handleMobileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = event.target.value.toUpperCase();
+      console.log('Mobile input value:', value);
       if (value.length > 0) {
         const lastChar = value[value.length - 1];
+        console.log('Last char:', lastChar);
         if (lastChar.match(/[A-Z]/)) {
+          console.log('Calling handleKeyPress with:', lastChar);
           handleKeyPress(lastChar);
+          console.log('After handleKeyPress, calling onKeyPress callback');
         }
         // Clear input for next character
         event.target.value = '';

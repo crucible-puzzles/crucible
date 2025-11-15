@@ -308,6 +308,11 @@ textarea:focus {
     --square-number-size: 10px;
   }
 
+  /* Make focus and highlights more visible on mobile */
+  .crossword-square-cell {
+    transition: background-color 0.1s ease;
+  }
+
   .shakespeare-section {
     flex-direction: column;
     gap: 15px;
