@@ -39,15 +39,10 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
     // Focus mobile input when square is focused
     useEffect(() => {
       if (isFocused && isMobile && mobileInputRef.current) {
-        // Use a small delay to ensure the DOM has updated
-        const timer = setTimeout(() => {
-          if (mobileInputRef.current) {
-            mobileInputRef.current.focus();
-            // Ensure keyboard stays visible
-            mobileInputRef.current.click();
-          }
-        }, 10);
-        return () => clearTimeout(timer);
+        // Immediately focus to prevent keyboard from closing
+        if (document.activeElement !== mobileInputRef.current) {
+          mobileInputRef.current.focus();
+        }
       }
     }, [isFocused, isMobile]);
 
@@ -146,11 +141,17 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
         if (lastChar.match(/[A-Z]/)) {
           // Update local state immediately for visual feedback
           setLetter(lastChar);
+          // Keep input value to maintain keyboard
+          event.target.value = lastChar;
           // Notify board which will trigger moveFocus
           onKeyPress(lastChar);
+          // Clear after a tiny delay to allow focus to move
+          setTimeout(() => {
+            if (event.target) {
+              event.target.value = '';
+            }
+          }, 50);
         }
-        // Clear input for next character
-        event.target.value = '';
       }
     };
 
@@ -165,16 +166,10 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
     };
 
     const handleMobileBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-      // On mobile, only allow blur if we're not focused
-      // This prevents keyboard from closing when moving between squares
+      // On mobile, prevent blur unless we're explicitly unfocusing
       if (isMobile && isFocused) {
-        e.preventDefault();
-        // Immediately refocus to keep keyboard open
-        setTimeout(() => {
-          if (mobileInputRef.current && isFocused) {
-            mobileInputRef.current.focus();
-          }
-        }, 0);
+        // Don't prevent blur - let it happen naturally
+        // The next square's focus will happen immediately via useEffect
         return;
       }
     };
