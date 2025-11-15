@@ -84,10 +84,11 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
   }, [boardWidth, boardHeight]);
 
   useEffect(() => {
-    if (squareRefs.current[focusIndex] && squareRefs.current[focusIndex].current) {
+    // Only focus square divs on desktop - mobile uses persistent mobile input
+    if (!isMobile && squareRefs.current[focusIndex] && squareRefs.current[focusIndex].current) {
       squareRefs.current[focusIndex].current?.focus();
     }
-  }, [focusIndex]);
+  }, [focusIndex, isMobile]);
 
   useEffect(() => {
     const updateHighlightedSquares = () => {
