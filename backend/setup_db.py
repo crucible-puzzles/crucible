@@ -17,19 +17,16 @@ def setup_database():
     with open('DDL/schema.sql', 'r') as f:
         schema_sql = f.read()
     
-    # Split by statement and execute
-    statements = [s.strip() for s in schema_sql.split(';') if s.strip()]
-    
+    # Execute the entire schema as one transaction
     with engine.connect() as conn:
-        for statement in statements:
-            if statement:
-                try:
-                    conn.execute(text(statement))
-                    conn.commit()
-                    print(f"✓ Executed: {statement[:50]}...")
-                except Exception as e:
-                    print(f"✗ Error: {str(e)}")
-                    print(f"  Statement: {statement[:100]}...")
+        try:
+            conn.execute(text(schema_sql))
+            conn.commit()
+            print(f"✓ Database schema executed successfully")
+        except Exception as e:
+            print(f"✗ Error executing schema: {str(e)}")
+            conn.rollback()
+            raise
     
     print("\n✓ Database setup complete!")
     print("\nYou can now start the backend server with:")
