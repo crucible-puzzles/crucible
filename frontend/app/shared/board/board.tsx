@@ -281,6 +281,14 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
         
         console.log("Moving horizontally to index:", nextIndex);
         setFocusIndex(nextIndex);
+        
+        // MOBILE FIX: Keep mobile input focused when moving programmatically
+        if (isMobile && mobileInputRef.current) {
+          // Use setTimeout to ensure focus happens after state update
+          setTimeout(() => {
+            mobileInputRef.current?.focus();
+          }, 0);
+        }
       } else {
         console.log("At end of row, not moving");
       }
@@ -297,6 +305,14 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
         
         console.log("Moving vertically to index:", nextIndex);
         setFocusIndex(nextIndex);
+        
+        // MOBILE FIX: Keep mobile input focused when moving programmatically
+        if (isMobile && mobileInputRef.current) {
+          // Use setTimeout to ensure focus happens after state update
+          setTimeout(() => {
+            mobileInputRef.current?.focus();
+          }, 0);
+        }
       } else {
         console.log("At bottom of column, not moving");
       }
@@ -325,6 +341,14 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
       }
     } while (!editorMode && squareRefs.current[prevIndex].current?.textContent === '.');
     setFocusIndex(prevIndex);
+    
+    // MOBILE FIX: Keep mobile input focused when moving backward
+    if (isMobile && mobileInputRef.current) {
+      // Use setTimeout to ensure focus happens after state update
+      setTimeout(() => {
+        mobileInputRef.current?.focus();
+      }, 0);
+    }
   };
 
   const handleKeyPress = (key: String, index: number) => {
@@ -373,6 +397,7 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
     const currentCol = focusIndex % boardWidth;
     const blackSquares = new Set(initialStructure);
     let nextIndex = focusIndex;
+    let moved = false;
 
     switch (direction) {
       case 'up':
@@ -381,6 +406,7 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
           if (!blackSquares.has(nextIndex)) {
             setFocusIndex(nextIndex);
             setFocusDirection('vertical');
+            moved = true;
           }
         }
         break;
@@ -390,6 +416,7 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
           if (!blackSquares.has(nextIndex)) {
             setFocusIndex(nextIndex);
             setFocusDirection('vertical');
+            moved = true;
           }
         }
         break;
@@ -399,6 +426,7 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
           if (!blackSquares.has(nextIndex)) {
             setFocusIndex(nextIndex);
             setFocusDirection('horizontal');
+            moved = true;
           }
         }
         break;
@@ -408,9 +436,17 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
           if (!blackSquares.has(nextIndex)) {
             setFocusIndex(nextIndex);
             setFocusDirection('horizontal');
+            moved = true;
           }
         }
         break;
+    }
+
+    // MOBILE FIX: Keep mobile input focused when using arrow keys
+    if (moved && isMobile && mobileInputRef.current) {
+      setTimeout(() => {
+        mobileInputRef.current?.focus();
+      }, 0);
     }
   };
 
@@ -446,18 +482,36 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
             if (hasRight) {
               const nextIndex = row * boardWidth + (col + 1);
               setFocusIndex(nextIndex);
+              // MOBILE FIX: Keep focus when moving after direction toggle
+              if (isMobile && mobileInputRef.current) {
+                setTimeout(() => {
+                  mobileInputRef.current?.focus();
+                }, 0);
+              }
             }
           } else {
             // Move down if possible
             if (hasDown) {
               const nextIndex = (row + 1) * boardWidth + col;
               setFocusIndex(nextIndex);
+              // MOBILE FIX: Keep focus when moving after direction toggle
+              if (isMobile && mobileInputRef.current) {
+                setTimeout(() => {
+                  mobileInputRef.current?.focus();
+                }, 0);
+              }
             }
           }
         }
-        // If square is empty, stay on current square
+        // If square is empty, stay on current square - still need to refocus mobile input
+        if (isMobile && mobileInputRef.current) {
+          mobileInputRef.current.focus();
+        }
       }
-      // Otherwise, do nothing (can't toggle at non-intersection)
+      // Otherwise, do nothing (can't toggle at non-intersection) - but still refocus for mobile
+      else if (isMobile && mobileInputRef.current) {
+        mobileInputRef.current.focus();
+      }
     } else {
       // Clicking a new square - determine the appropriate direction
       setFocusIndex(index);
