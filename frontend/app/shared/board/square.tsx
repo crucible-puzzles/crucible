@@ -89,50 +89,43 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
     };
 
     const handleKeyPress = (key: String) => {
-      console.log('handleKeyPress called, editorMode:', editorMode, 'key:', key, 'letter:', letter);
       if (editorMode || (key !== '.' && letter !== '.')) {
         if (key.length === 1 && key.match(/[a-zA-Z\.]/)) {
-          console.log('Valid letter, updating state and calling onKeyPress');
-          // Don't update local state - let the Board handle it via externalLetter prop
-          // setLetter(key.toUpperCase());
+          setLetter(key.toUpperCase());
           onKeyPress(key);
         } else if (key === 'Backspace') {
-          console.log('Backspace pressed');
-          // Don't update local state - let the Board handle it
-          // setLetter('');
-          onBackspace(); // Notify Board to move focus backward
+          setLetter('');
+          onBackspace();
           onKeyPress(key);
         }
-      } else {
-        console.log('Condition failed, not processing key');
       }
     };
 
-    const handleClick = (e: React.MouseEvent) => {
+    const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
       if (editorMode || content !== '.') {
-        onClick(); // Call onClick when the square is clicked
-        // On mobile, focus the hidden input to trigger keyboard
+        // Always call onClick to set focus in Board
+        onClick();
+        // On mobile, also focus the hidden input to trigger keyboard
         if (isMobile && mobileInputRef.current) {
           e.preventDefault();
           setTimeout(() => {
             if (mobileInputRef.current) {
               mobileInputRef.current.focus();
-              mobileInputRef.current.click();
             }
-          }, 100);
+          }, 50);
         }
       }
     };
 
     const handleInputClick = (e: React.MouseEvent) => {
-      e.stopPropagation();
+      // Don't stop propagation - let it bubble to trigger onClick
       if (mobileInputRef.current) {
         mobileInputRef.current.focus();
       }
     };
 
     const handleInputTouch = (e: React.TouchEvent) => {
-      e.stopPropagation();
+      // Don't stop propagation - let it bubble to trigger onClick
       if (mobileInputRef.current) {
         mobileInputRef.current.focus();
       }
@@ -140,14 +133,13 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
 
     const handleMobileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = event.target.value.toUpperCase();
-      console.log('Mobile input value:', value);
       if (value.length > 0) {
         const lastChar = value[value.length - 1];
-        console.log('Last char:', lastChar);
         if (lastChar.match(/[A-Z]/)) {
-          console.log('Calling handleKeyPress with:', lastChar);
-          handleKeyPress(lastChar);
-          console.log('After handleKeyPress, calling onKeyPress callback');
+          // Update local state immediately for visual feedback
+          setLetter(lastChar);
+          // Notify board which will trigger moveFocus
+          onKeyPress(lastChar);
         }
         // Clear input for next character
         event.target.value = '';
@@ -157,7 +149,10 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
     const handleMobileKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === 'Backspace') {
         event.preventDefault();
-        handleKeyPress('Backspace');
+        // Clear the letter and notify board
+        setLetter('');
+        onBackspace();
+        onKeyPress('Backspace');
       }
     };
 
@@ -182,6 +177,7 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
         tabIndex={isMobile ? -1 : 0}
         onKeyDown={!isMobile ? handlePCKeyPress : undefined}
         onClick={handleClick}
+        onTouchEnd={isMobile ? handleClick : undefined}
         className="crossword-square-cell"
         style={{
           width: 'var(--square-size, 50px)',
