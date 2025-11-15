@@ -141,16 +141,12 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
         if (lastChar.match(/[A-Z]/)) {
           // Update local state immediately for visual feedback
           setLetter(lastChar);
-          // Keep input value to maintain keyboard
-          event.target.value = lastChar;
+          // Clear input immediately for next character
+          event.target.value = '';
           // Notify board which will trigger moveFocus
+          // This will cause the next square's isFocused to become true
+          // which will trigger its useEffect to focus its input
           onKeyPress(lastChar);
-          // Clear after a tiny delay to allow focus to move
-          setTimeout(() => {
-            if (event.target) {
-              event.target.value = '';
-            }
-          }, 50);
         }
       }
     };
@@ -166,11 +162,16 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
     };
 
     const handleMobileBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-      // On mobile, prevent blur unless we're explicitly unfocusing
-      if (isMobile && isFocused) {
-        // Don't prevent blur - let it happen naturally
-        // The next square's focus will happen immediately via useEffect
-        return;
+      // Only prevent blur if this square is still focused
+      // This allows natural focus transfer to the next square
+      if (isMobile && isFocused && mobileInputRef.current) {
+        // Prevent blur and refocus to keep keyboard open
+        e.preventDefault();
+        setTimeout(() => {
+          if (mobileInputRef.current && isFocused) {
+            mobileInputRef.current.focus();
+          }
+        }, 0);
       }
     };
 
