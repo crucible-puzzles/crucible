@@ -56,12 +56,7 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Keep mobile input focused when focusIndex changes
-  useEffect(() => {
-    if (isMobile && focusIndex >= 0 && mobileInputRef.current) {
-      mobileInputRef.current.focus();
-    }
-  }, [focusIndex, isMobile]);
+  // Remove async focus - now handled synchronously in click handler for iOS Safari compatibility
 
   useEffect(() => {
     if (typeof focusIndex === 'number' && focusIndex >= 0 && focusIndex < letters.length) {
@@ -476,6 +471,12 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
       // If part of both words (intersection), keep current direction
       // If part of neither (isolated square), keep current direction
     }
+
+    // CRITICAL FIX: Focus mobile input directly in click handler for iOS Safari compatibility
+    if (isMobile && mobileInputRef.current) {
+      // Must happen synchronously within the touch event for iOS Safari to show keyboard
+      mobileInputRef.current.focus();
+    }
   };
 
   const handleSquareBlur = (index: number) => {
@@ -536,7 +537,7 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
       alignItems: 'flex-start',
       position: 'relative'
     }}>
-      {/* Single persistent mobile input */}
+      {/* Single persistent mobile input - iOS Safari optimized */}
       {isMobile && (
         <input
           ref={mobileInputRef}
@@ -552,15 +553,17 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
             position: 'absolute',
             top: 0,
             left: 0,
-            width: '1px',
-            height: '1px',
+            width: '30px',
+            height: '30px',
             opacity: 0.01,
-            fontSize: '16px',
+            fontSize: '16px', // Critical: 16px+ prevents zoom on iOS Safari
             border: 'none',
             outline: 'none',
             padding: 0,
             margin: 0,
             zIndex: 1000,
+            transform: 'scale(0.1)', // Make visually tiny while keeping actual size
+            transformOrigin: 'top left'
           }}
           readOnly={false}
         />
