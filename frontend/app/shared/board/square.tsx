@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef } from 'react';
+import React, { useState, useEffect, forwardRef, useRef } from 'react';
 
 interface SquareProps {
   onKeyPress: (key: String) => void;
@@ -18,11 +18,30 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
   ({ onKeyPress, onClick, onBackspace, onBlur, onArrowKey, isFocused, isHighlighted, editorMode, number, initialContents, externalLetter }, ref) => {
     const [letter, setLetter] = useState(initialContents);
     const [content, setContent] = useState(initialContents);
+    const [isMobile, setIsMobile] = useState(false);
+    const mobileInputRef = useRef<HTMLInputElement>(null);
+
+    // Detect if device is mobile
+    useEffect(() => {
+      const checkMobile = () => {
+        setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0);
+      };
+      checkMobile();
+      window.addEventListener('resize', checkMobile);
+      return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // Update letter when initialContents changes (for loading saved puzzles)
     useEffect(() => {
       setLetter(initialContents);
     }, [initialContents]);
+
+    // Focus mobile input when square is focused
+    useEffect(() => {
+      if (isFocused && isMobile && mobileInputRef.current) {
+        mobileInputRef.current.focus();
+      }
+    }, [isFocused, isMobile]);
 
     useEffect(() => {
       setContent(letter)
@@ -88,6 +107,31 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
     const handleClick = () => {
       if (editorMode || content !== '.') {
         onClick(); // Call onClick when the square is clicked
+        // On mobile, focus the hidden input to trigger keyboard
+        if (isMobile && mobileInputRef.current) {
+          setTimeout(() => {
+            mobileInputRef.current?.focus();
+          }, 0);
+        }
+      }
+    };
+
+    const handleMobileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value.toUpperCase();
+      if (value.length > 0) {
+        const lastChar = value[value.length - 1];
+        if (lastChar.match(/[A-Z]/)) {
+          handleKeyPress(lastChar);
+        }
+        // Clear input for next character
+        event.target.value = '';
+      }
+    };
+
+    const handleMobileKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Backspace') {
+        event.preventDefault();
+        handleKeyPress('Backspace');
       }
     };
 
@@ -101,15 +145,16 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
         ref={ref}
         data-letter={letter}
         data-number={number !== undefined && number !== null ? number.toString() : ''}
-        tabIndex={0}
-        onKeyDown={handlePCKeyPress}
+        tabIndex={isMobile ? -1 : 0}
+        onKeyDown={!isMobile ? handlePCKeyPress : undefined}
         onClick={handleClick}
+        className="crossword-square-cell"
         style={{
-          width: '50px',
-          height: '50px',
+          width: 'var(--square-size, 50px)',
+          height: 'var(--square-size, 50px)',
           border: '1px solid black',
           position: 'relative',
-          fontSize: '24px',
+          fontSize: 'var(--square-font-size, 24px)',
           fontFamily: 'Kadwa',
           fontWeight: 400,
           fontStyle: 'normal',
@@ -118,14 +163,41 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
           backgroundColor: isFocused ? '#4A90E2' : isHighlighted ? '#E8F4FF' : content === '.' ? 'black' : 'white'
         }}
       >
+        {/* Hidden input for mobile keyboard */}
+        {isMobile && (
+          <input
+            ref={mobileInputRef}
+            type="text"
+            inputMode="text"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="characters"
+            spellCheck="false"
+            onChange={handleMobileInput}
+            onKeyDown={handleMobileKeyDown}
+            onBlur={handleBlur}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              opacity: 0,
+              pointerEvents: 'none',
+              fontSize: '16px', // Prevents zoom on iOS
+            }}
+            aria-hidden="true"
+          />
+        )}
         {number !== null && (
           <div
+            className="square-number"
             style={{
               position: 'absolute',
               top: '2px',
               left: '2px',
-              fontSize: '12px',
-              lineHeight: '12px',
+              fontSize: 'var(--square-number-size, 12px)',
+              lineHeight: 'var(--square-number-size, 12px)',
               fontFamily: 'Kadwa',
               fontWeight: 400,
               userSelect: 'none',

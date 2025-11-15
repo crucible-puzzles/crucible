@@ -487,14 +487,15 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
 
   return (
     <div style={{
-      display:'flex', 
+      display:'flex',
       flexDirection:'row',
       alignItems: 'flex-start'
     }}>
       <div
+        className="crossword-board"
         style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${boardWidth}, 50px)`,
+          gridTemplateColumns: `repeat(${boardWidth}, var(--square-size, 50px))`,
           gridGap: '0px',
         }}
       >

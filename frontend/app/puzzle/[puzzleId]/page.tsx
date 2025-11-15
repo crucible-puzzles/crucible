@@ -110,25 +110,27 @@ export default function Solver() {
       </div>
 
       <div className="container">
-        <div style={{ marginTop: '40px' }}>
-          <h1 style={{ fontSize: '14pt', marginBottom: '5px' }}>{puzzle.title}</h1>
-          <p style={{ fontSize: '9pt', color: '#828282', marginBottom: '20px' }}>
+        <div className="puzzle-solve-container">
+          <h1 className="puzzle-title">{puzzle.title}</h1>
+          <p className="puzzle-author">
             by {puzzle.createdBy}
           </p>
 
-          <div style={{ display: 'flex', gap: '40px', alignItems: 'flex-start' }}>
-            <Board
-              ref={boardRef}
-              boardWidth={puzzle.boardWidth}
-              boardHeight={puzzle.boardHeight}
-              editorMode={false}
-              initialStructure={puzzle.structure}
-              initialHints={puzzle.hints}
-              onBoardContentChange={setBoardContents}
-              externalLetter=""
-            />
+          <div className="puzzle-content">
+            <div className="board-wrapper">
+              <Board
+                ref={boardRef}
+                boardWidth={puzzle.boardWidth}
+                boardHeight={puzzle.boardHeight}
+                editorMode={false}
+                initialStructure={puzzle.structure}
+                initialHints={puzzle.hints}
+                onBoardContentChange={setBoardContents}
+                externalLetter=""
+              />
+            </div>
 
-            <div className="hints-container" style={{ flex: 1 }}>
+            <div className="hints-container">
               <div className="hint-section">
                 <div className="hint-title">Across</div>
                 {puzzle.hints
@@ -153,39 +155,20 @@ export default function Solver() {
             </div>
           </div>
 
-          <div style={{ marginTop: '20px' }}>
-            <button onClick={handleSubmit}>Check Solution</button>
+          <div className="submit-button-container">
+            <button onClick={handleSubmit} className="submit-button">Check Solution</button>
           </div>
 
           {showPopup && (
-            <div
-              style={{
-                position: 'fixed',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                backgroundColor: '#fff',
-                padding: '20px',
-                border: '2px solid #828282',
-                zIndex: 1000,
-              }}
-            >
-              <p style={{ marginBottom: '15px' }}>{popupMessage}</p>
-              <button onClick={() => setShowPopup(false)}>OK</button>
+            <div className="popup-modal">
+              <p className="popup-message">{popupMessage}</p>
+              <button onClick={() => setShowPopup(false)} className="popup-button">OK</button>
             </div>
           )}
 
           {showPopup && (
             <div
-              style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                zIndex: 999,
-              }}
+              className="popup-overlay"
               onClick={() => setShowPopup(false)}
             />
           )}
