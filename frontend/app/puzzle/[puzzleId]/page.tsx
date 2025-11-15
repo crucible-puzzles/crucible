@@ -15,38 +15,11 @@ export default function Solver() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
   const boardRef = React.useRef<any>(null);
-  const mobileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Detect mobile
-    const checkMobile = () => {
-      setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0);
-    };
-    checkMobile();
-    
     fetchPuzzle();
   }, [puzzleId]);
-
-  const handleMobileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toUpperCase();
-    if (value.length > 0 && boardRef.current) {
-      const lastChar = value[value.length - 1];
-      if (lastChar.match(/[A-Z]/)) {
-        // Send to board
-        boardRef.current.handleMobileKey(lastChar);
-      }
-    }
-    e.target.value = '';
-  };
-
-  const handleMobileKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && boardRef.current) {
-      e.preventDefault();
-      boardRef.current.handleMobileKey('Backspace');
-    }
-  };
 
   const fetchPuzzle = async () => {
     try {
@@ -143,29 +116,7 @@ export default function Solver() {
             by {puzzle.createdBy}
           </p>
 
-          {/* Single mobile input for entire board */}
-          {isMobile && (
-            <input
-              ref={mobileInputRef}
-              type="text"
-              inputMode="text"
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="characters"
-              spellCheck="false"
-              onChange={handleMobileInput}
-              onKeyDown={handleMobileKeyDown}
-              style={{
-                position: 'fixed',
-                top: '-9999px',
-                left: '-9999px',
-                opacity: 0,
-                pointerEvents: 'none',
-              }}
-            />
-          )}
-
-          <div className="puzzle-content" onClick={() => isMobile && mobileInputRef.current?.focus()}>
+          <div className="puzzle-content">
             <div className="board-wrapper">
               <Board
                 ref={boardRef}
@@ -176,7 +127,6 @@ export default function Solver() {
                 initialHints={puzzle.hints}
                 onBoardContentChange={setBoardContents}
                 externalLetter=""
-                mobileInputRef={mobileInputRef}
               />
             </div>
 
