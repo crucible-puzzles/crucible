@@ -476,13 +476,6 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
       // If part of both words (intersection), keep current direction
       // If part of neither (isolated square), keep current direction
     }
-    
-    // On mobile, ensure input stays focused
-    if (isMobile && mobileInputRef.current) {
-      setTimeout(() => {
-        mobileInputRef.current?.focus();
-      }, 0);
-    }
   };
 
   const handleSquareBlur = (index: number) => {
@@ -557,12 +550,17 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
           onKeyDown={handleMobileKeyDown}
           style={{
             position: 'absolute',
-            top: '-9999px',
-            left: '-9999px',
+            top: 0,
+            left: 0,
             width: '1px',
             height: '1px',
-            opacity: 0,
-            fontSize: '16px', // Prevents zoom on iOS
+            opacity: 0.01,
+            fontSize: '16px',
+            border: 'none',
+            outline: 'none',
+            padding: 0,
+            margin: 0,
+            zIndex: 1000,
           }}
           readOnly={false}
         />
