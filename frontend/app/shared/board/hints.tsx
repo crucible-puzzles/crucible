@@ -22,8 +22,12 @@ const Hints: React.FC<HintsProps> = ({ hints, currentHint, onHintChange }) => {
     }
   };
 
-  const acrossHints = hints.filter((hint) => hint.direction === 'across');
-  const downHints = hints.filter((hint) => hint.direction === 'down');
+  const acrossHints = hints
+    .filter((hint) => hint.direction === 'across')
+    .sort((a, b) => parseInt(a.number) - parseInt(b.number));
+  const downHints = hints
+    .filter((hint) => hint.direction === 'down')
+    .sort((a, b) => parseInt(a.number) - parseInt(b.number));
 
   return (
     <div>
