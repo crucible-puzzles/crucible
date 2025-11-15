@@ -162,16 +162,23 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
     };
 
     const handleMobileBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-      // Only prevent blur if this square is still focused
-      // This allows natural focus transfer to the next square
-      if (isMobile && isFocused && mobileInputRef.current) {
-        // Prevent blur and refocus to keep keyboard open
+      // On mobile, aggressively prevent ALL blur events
+      // The keyboard should stay open continuously while solving
+      if (isMobile && mobileInputRef.current) {
         e.preventDefault();
-        setTimeout(() => {
-          if (mobileInputRef.current && isFocused) {
+        // Use requestAnimationFrame for reliable refocus
+        requestAnimationFrame(() => {
+          // Check if another input has taken focus
+          const activeElement = document.activeElement;
+          const isAnotherInputFocused = activeElement &&
+                                       activeElement.tagName === 'INPUT' &&
+                                       activeElement !== mobileInputRef.current;
+          
+          // Only refocus if no other input has focus
+          if (!isAnotherInputFocused && mobileInputRef.current) {
             mobileInputRef.current.focus();
           }
-        }, 0);
+        });
       }
     };
 
