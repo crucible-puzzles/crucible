@@ -32,6 +32,8 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
   const [hints, setHints] = useState(initialHints);
   const [currentHint, setCurrentHint] = useState<{ number: string; direction: 'down' | 'across' } | null>(null);
   const [selectedHint, setSelectedHint] = useState<{ number: string; direction: 'down' | 'across' } | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const mobileInputRef = useRef<HTMLInputElement>(null);
   
   // Initialize letters from solution if provided, otherwise empty
   const [letters, setLetters] = useState(() => {
@@ -43,6 +45,23 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
   
   // Track if refs are ready for calculation
   const [refsReady, setRefsReady] = useState(false);
+
+  // Detect if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Keep mobile input focused when focusIndex changes
+  useEffect(() => {
+    if (isMobile && focusIndex >= 0 && mobileInputRef.current) {
+      mobileInputRef.current.focus();
+    }
+  }, [focusIndex, isMobile]);
 
   useEffect(() => {
     if (typeof focusIndex === 'number' && focusIndex >= 0 && focusIndex < letters.length) {
@@ -330,6 +349,30 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
     }
   };
 
+  const handleMobileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (focusIndex < 0) return;
+    
+    const value = event.target.value.toUpperCase();
+    if (value.length > 0) {
+      const lastChar = value[value.length - 1];
+      if (lastChar.match(/[A-Z]/)) {
+        handleKeyPress(lastChar, focusIndex);
+        // Clear input for next character
+        event.target.value = '';
+      }
+    }
+  };
+
+  const handleMobileKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (focusIndex < 0) return;
+    
+    if (event.key === 'Backspace') {
+      event.preventDefault();
+      handleKeyPress('Backspace', focusIndex);
+      moveFocusBackward();
+    }
+  };
+
   const handleArrowKey = (direction: 'up' | 'down' | 'left' | 'right') => {
     const currentRow = Math.floor(focusIndex / boardWidth);
     const currentCol = focusIndex % boardWidth;
@@ -433,6 +476,13 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
       // If part of both words (intersection), keep current direction
       // If part of neither (isolated square), keep current direction
     }
+    
+    // On mobile, ensure input stays focused
+    if (isMobile && mobileInputRef.current) {
+      setTimeout(() => {
+        mobileInputRef.current?.focus();
+      }, 0);
+    }
   };
 
   const handleSquareBlur = (index: number) => {
@@ -481,6 +531,7 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
         number={squareNumbers[i]}
         initialContents={initialContent}
         externalLetter={letters[i]}
+        isMobile={isMobile}
       />
     );
   };
@@ -489,8 +540,33 @@ const Board = forwardRef<{ getBoardContents: () => string[] }, BoardProps>((prop
     <div style={{
       display:'flex',
       flexDirection:'row',
-      alignItems: 'flex-start'
+      alignItems: 'flex-start',
+      position: 'relative'
     }}>
+      {/* Single persistent mobile input */}
+      {isMobile && (
+        <input
+          ref={mobileInputRef}
+          type="text"
+          inputMode="text"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="characters"
+          spellCheck="false"
+          onChange={handleMobileInput}
+          onKeyDown={handleMobileKeyDown}
+          style={{
+            position: 'absolute',
+            top: '-9999px',
+            left: '-9999px',
+            width: '1px',
+            height: '1px',
+            opacity: 0,
+            fontSize: '16px', // Prevents zoom on iOS
+          }}
+          readOnly={false}
+        />
+      )}
       <div
         className="crossword-board"
         style={{

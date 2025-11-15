@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, useRef } from 'react';
+import React, { useState, useEffect, forwardRef } from 'react';
 
 interface SquareProps {
   onKeyPress: (key: String) => void;
@@ -11,38 +11,19 @@ interface SquareProps {
   editorMode: boolean;
   number: number | null;
   initialContents: string;
-  externalLetter: string; // New prop for external control of letter
+  externalLetter: string;
+  isMobile: boolean;
 }
 
 const Square = forwardRef<HTMLDivElement, SquareProps>(
-  ({ onKeyPress, onClick, onBackspace, onBlur, onArrowKey, isFocused, isHighlighted, editorMode, number, initialContents, externalLetter }, ref) => {
+  ({ onKeyPress, onClick, onBackspace, onBlur, onArrowKey, isFocused, isHighlighted, editorMode, number, initialContents, externalLetter, isMobile }, ref) => {
     const [letter, setLetter] = useState(initialContents);
     const [content, setContent] = useState(initialContents);
-    const [isMobile, setIsMobile] = useState(false);
-    const mobileInputRef = useRef<HTMLInputElement>(null);
-
-    // Detect if device is mobile
-    useEffect(() => {
-      const checkMobile = () => {
-        setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0);
-      };
-      checkMobile();
-      window.addEventListener('resize', checkMobile);
-      return () => window.removeEventListener('resize', checkMobile);
-    }, []);
 
     // Update letter when initialContents changes (for loading saved puzzles)
     useEffect(() => {
       setLetter(initialContents);
     }, [initialContents]);
-
-    // Focus mobile input when square is focused
-    useEffect(() => {
-      if (isFocused && isMobile && mobileInputRef.current) {
-        // Focus immediately and synchronously
-        mobileInputRef.current.focus();
-      }
-    }, [isFocused, isMobile]);
 
     useEffect(() => {
       setContent(letter)
@@ -104,64 +85,8 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
 
     const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
       if (editorMode || content !== '.') {
-        // Always call onClick to set focus in Board
         onClick();
-        // On mobile, also focus the hidden input to trigger keyboard
-        if (isMobile && mobileInputRef.current) {
-          e.preventDefault();
-          setTimeout(() => {
-            if (mobileInputRef.current) {
-              mobileInputRef.current.focus();
-            }
-          }, 50);
-        }
       }
-    };
-
-    const handleInputClick = (e: React.MouseEvent) => {
-      // Don't stop propagation - let it bubble to trigger onClick
-      if (mobileInputRef.current) {
-        mobileInputRef.current.focus();
-      }
-    };
-
-    const handleInputTouch = (e: React.TouchEvent) => {
-      // Don't stop propagation - let it bubble to trigger onClick
-      if (mobileInputRef.current) {
-        mobileInputRef.current.focus();
-      }
-    };
-
-    const handleMobileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value.toUpperCase();
-      if (value.length > 0) {
-        const lastChar = value[value.length - 1];
-        if (lastChar.match(/[A-Z]/)) {
-          // Update local state immediately for visual feedback
-          setLetter(lastChar);
-          // Clear input immediately for next character
-          event.target.value = '';
-          // Notify board which will trigger moveFocus
-          // This will cause the next square's isFocused to become true
-          // which will trigger its useEffect to focus its input
-          onKeyPress(lastChar);
-        }
-      }
-    };
-
-    const handleMobileKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Backspace') {
-        event.preventDefault();
-        // Clear the letter and notify board
-        setLetter('');
-        onBackspace();
-        onKeyPress('Backspace');
-      }
-    };
-
-    const handleMobileBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-      // Don't prevent blur - let focus transfer naturally
-      // The next square's useEffect will handle focusing
     };
 
     const handleBlur = () => {
@@ -194,38 +119,6 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
           backgroundColor: isFocused ? '#4A90E2' : isHighlighted ? '#E8F4FF' : content === '.' ? 'black' : 'white'
         }}
       >
-        {/* Hidden input for mobile keyboard */}
-        {isMobile && (
-          <input
-            ref={mobileInputRef}
-            type="text"
-            inputMode="text"
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="characters"
-            spellCheck="false"
-            onChange={handleMobileInput}
-            onKeyDown={handleMobileKeyDown}
-            onBlur={handleMobileBlur}
-            onClick={handleInputClick}
-            onTouchStart={handleInputTouch}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              opacity: 0,
-              border: 'none',
-              background: 'transparent',
-              fontSize: '16px', // Prevents zoom on iOS
-              color: 'transparent',
-              caretColor: 'transparent',
-              zIndex: 10,
-            }}
-            readOnly={false}
-          />
-        )}
         {number !== null && (
           <div
             className="square-number"
