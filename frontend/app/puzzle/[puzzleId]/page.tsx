@@ -135,6 +135,7 @@ export default function Solver() {
                 <div className="hint-title">Across</div>
                 {puzzle.hints
                   .filter((h: any) => h.direction === 'across')
+                  .sort((a: any, b: any) => parseInt(a.number) - parseInt(b.number))
                   .map((hint: any) => (
                     <div key={`across-${hint.number}`} className="hint-item">
                       {hint.number}. {hint.hint}
@@ -146,6 +147,7 @@ export default function Solver() {
                 <div className="hint-title">Down</div>
                 {puzzle.hints
                   .filter((h: any) => h.direction === 'down')
+                  .sort((a: any, b: any) => parseInt(a.number) - parseInt(b.number))
                   .map((hint: any) => (
                     <div key={`down-${hint.number}`} className="hint-item">
                       {hint.number}. {hint.hint}
