@@ -89,30 +89,45 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
     };
 
     const handleKeyPress = (key: String) => {
-      console.log("Square handleKeyPress called with key:", key, "initialContents:", initialContents);
       if (editorMode || (key !== '.' && letter !== '.')) {
         if (key.length === 1 && key.match(/[a-zA-Z\.]/)) {
           setLetter(key.toUpperCase());
-          console.log("Square calling onKeyPress callback");
           onKeyPress(key);
         } else if (key === 'Backspace') {
           setLetter('');
           onBackspace(); // Notify Board to move focus backward
-          console.log("Square calling onKeyPress callback for Backspace");
           onKeyPress(key);
         }
       }
     };
 
-    const handleClick = () => {
+    const handleClick = (e: React.MouseEvent) => {
       if (editorMode || content !== '.') {
         onClick(); // Call onClick when the square is clicked
         // On mobile, focus the hidden input to trigger keyboard
         if (isMobile && mobileInputRef.current) {
+          e.preventDefault();
           setTimeout(() => {
-            mobileInputRef.current?.focus();
-          }, 0);
+            if (mobileInputRef.current) {
+              mobileInputRef.current.focus();
+              mobileInputRef.current.click();
+            }
+          }, 100);
         }
+      }
+    };
+
+    const handleInputClick = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (mobileInputRef.current) {
+        mobileInputRef.current.focus();
+      }
+    };
+
+    const handleInputTouch = (e: React.TouchEvent) => {
+      e.stopPropagation();
+      if (mobileInputRef.current) {
+        mobileInputRef.current.focus();
       }
     };
 
@@ -135,9 +150,17 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
       }
     };
 
+    const handleMobileBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+      // On mobile, prevent blur to keep keyboard open
+      if (isMobile) {
+        return;
+      }
+    };
+
     const handleBlur = () => {
-      console.log("SQUARE BLURRED!");
-      onBlur();
+      if (!isMobile) {
+        onBlur();
+      }
     };
 
     return (
@@ -175,7 +198,9 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
             spellCheck="false"
             onChange={handleMobileInput}
             onKeyDown={handleMobileKeyDown}
-            onBlur={handleBlur}
+            onBlur={handleMobileBlur}
+            onClick={handleInputClick}
+            onTouchStart={handleInputTouch}
             style={{
               position: 'absolute',
               top: 0,
@@ -188,8 +213,9 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
               fontSize: '16px', // Prevents zoom on iOS
               color: 'transparent',
               caretColor: 'transparent',
+              zIndex: 10,
             }}
-            aria-hidden="true"
+            readOnly={false}
           />
         )}
         {number !== null && (
