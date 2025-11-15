@@ -39,7 +39,15 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
     // Focus mobile input when square is focused
     useEffect(() => {
       if (isFocused && isMobile && mobileInputRef.current) {
-        mobileInputRef.current.focus();
+        // Use a small delay to ensure the DOM has updated
+        const timer = setTimeout(() => {
+          if (mobileInputRef.current) {
+            mobileInputRef.current.focus();
+            // Ensure keyboard stays visible
+            mobileInputRef.current.click();
+          }
+        }, 10);
+        return () => clearTimeout(timer);
       }
     }, [isFocused, isMobile]);
 
@@ -157,8 +165,16 @@ const Square = forwardRef<HTMLDivElement, SquareProps>(
     };
 
     const handleMobileBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-      // On mobile, prevent blur to keep keyboard open
-      if (isMobile) {
+      // On mobile, only allow blur if we're not focused
+      // This prevents keyboard from closing when moving between squares
+      if (isMobile && isFocused) {
+        e.preventDefault();
+        // Immediately refocus to keep keyboard open
+        setTimeout(() => {
+          if (mobileInputRef.current && isFocused) {
+            mobileInputRef.current.focus();
+          }
+        }, 0);
         return;
       }
     };
